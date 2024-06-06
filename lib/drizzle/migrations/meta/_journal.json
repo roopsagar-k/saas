@@ -1,0 +1,48 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1715101067323,
+      "tag": "0000_gigantic_sebastian_shaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1715511315511,
+      "tag": "0001_friendly_bloodscream",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1715876829704,
+      "tag": "0002_wonderful_stature",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1715960729267,
+      "tag": "0003_small_juggernaut",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1716372591091,
+      "tag": "0004_magenta_psynapse",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1716374209744,
+      "tag": "0005_glamorous_malice",
+      "breakpoints": true
+    }
+  ]
+}
