@@ -9,7 +9,8 @@ export const PUT = auth(async function PUT(
   req,
   { params }: { params: { id: string } }
 ) {
-  const { commentMessage, commentId } = await req.json();
+  console.log("reached yo")
+  const { commentMessage, commentId, recipientId } = await req.json();
   const comment = await db
     .select()
     .from(CommentsTable)
@@ -23,6 +24,7 @@ export const PUT = auth(async function PUT(
     message: commentMessage,
     createdAt: Date.now(),
     userId: req.auth?.user?.id!,
+    recipientId: recipientId,
     postId: params.id,
   });
   await db
@@ -81,9 +83,16 @@ export async function GET(
             .where(eq(UserTable.id, nestedComment.userId))
             .then((res) => res[0]);
 
+          const recipient = await db
+            .select()
+            .from(UserTable)
+            .where(eq(UserTable.id, nestedComment.recipientId))
+            .then((res) => res[0]);
+
           return {
             ...nestedComment,
             user,
+            recipient,
           };
         })
       );

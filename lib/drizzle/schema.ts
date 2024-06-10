@@ -57,6 +57,47 @@ export const CommentsTable = pgTable("comments", {
   nestedComments: jsonb("children_comments").default([]).array(),
 });
 
+//upvotes and downvotes table schema
+export const VotesTable = pgTable("upvotes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  upVote: boolean("up_vote").default(false),
+  downVote: boolean("down_vote").default(false),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => UserTable.id),
+  postId: uuid("post_id")
+    .notNull()
+    .references(() => TestTable.id),
+});
+
+//upvotes and downvotes for comments
+export const CommentsVotesTable = pgTable("comment_votes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  upVote: boolean("up_vote").default(false),
+  downVote: boolean("down_vote").default(false),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => UserTable.id),
+  commentId: uuid("comment_id")
+    .notNull()
+    .references(() => CommentsTable.id, { onDelete: "cascade" })
+    .notNull(),
+});
+
+//nested comments votes
+export const NestedCommentsVotesTable = pgTable("nested_comment_votes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  upVote: boolean("up_vote").default(false),
+  downVote: boolean("down_vote").default(false),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => UserTable.id),
+  commentId: uuid("comment_id")
+    .notNull()
+    .references(() => CommentsTable.id, { onDelete: "cascade" }).notNull(),
+  nestedCommentId: uuid("nested_comment_id").notNull(),
+});
+
 //Relations
 
 export const UserTableRelations = relations(UserTable, ({ many }) => {
@@ -102,3 +143,48 @@ export const CommentsTableRelations = relations(CommentsTable, ({ one }) => {
     }),
   };
 });
+
+export const VotesTableRelations = relations(VotesTable, ({ one }) => {
+  return {
+    user: one(UserTable, {
+      fields: [VotesTable.userId],
+      references: [UserTable.id],
+    }),
+    post: one(TestTable, {
+      fields: [VotesTable.postId],
+      references: [TestTable.id],
+    }),
+  };
+});
+
+export const CommentsVotesTableRelations = relations(
+  CommentsVotesTable,
+  ({ one }) => {
+    return {
+      user: one(UserTable, {
+        fields: [CommentsVotesTable.userId],
+        references: [UserTable.id],
+      }),
+      comment: one(CommentsTable, {
+        fields: [CommentsVotesTable.commentId],
+        references: [CommentsTable.id],
+      }),
+    };
+  }
+);
+
+export const NestedCommentsVotesTableRelations = relations(
+  NestedCommentsVotesTable,
+  ({ one }) => {
+    return {
+      user: one(UserTable, {
+        fields: [NestedCommentsVotesTable.userId],
+        references: [UserTable.id],
+      }),
+      comment: one(CommentsTable, {
+        fields: [NestedCommentsVotesTable.commentId],
+        references: [CommentsTable.id],
+      }),
+    };
+  }
+);

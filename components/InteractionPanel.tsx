@@ -1,61 +1,143 @@
-import React from "react";
+"use client";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Post } from "@/app/types/types";
+import { Post, Vote, UserVoteType } from "@/app/types/types";
+import axios from "@/axiosConfig";
+import CopyLinkComponent from "./CopyLinkComponent";
+import { usePathname } from "next/navigation";
 
-const InteractionPanel = ({
+interface InteractionPanelProps {
+  setShowTextArea?: React.Dispatch<React.SetStateAction<boolean>>;
+  post: Post;
+  vote: UserVoteType;
+  setVote: React.Dispatch<React.SetStateAction<UserVoteType | undefined>>;
+}
+
+const InteractionPanel: React.FC<InteractionPanelProps> = ({
   setShowTextArea,
   post,
-}: {
-  setShowTextArea?: React.Dispatch<React.SetStateAction<boolean>>;
-  post?: Post;
+  vote,
+  setVote,
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
+  let link = "http://localhost:3000/";
+  if (pathname === "/home") {
+    link += pathname + "/post/" + post?.tests.id;
+  } else {
+    link += pathname;
+  }
   const handleClick = () => {
     if (setShowTextArea) {
-      setShowTextArea!(true);
+      setShowTextArea(true);
     } else {
       router.push(`/home/post/${post?.tests?.id}`);
     }
   };
+
+  const updateUpVote = async () => {
+    console.log(vote);
+    await axios.put(`api/posts/${post?.tests?.id}`, {
+      operation: "upVote",
+      val: !vote?.upVote,
+    });
+    setVote((prev) => {
+      return {
+        ...prev!,
+        upVote: !prev?.upVote,
+        downVote: !prev?.upVote ? false : prev?.downVote,
+      };
+    });
+  };
+
+  const updateDownVote = async () => {
+    await axios.put(`api/posts/${post?.tests?.id}`, {
+      operation: "downVote",
+      val: !vote?.downVote,
+    });
+    setVote((prev) => {
+      return {
+        ...prev!,
+        downVote: !prev?.downVote,
+        upVote: !prev?.downVote ? false : prev?.upVote,
+      };
+    });
+  };
   return (
     <div className="mt-4 border border-secondary rounded-md flex text-[#A8B3CF]">
       <div className="bg-secondary flex rounded-md w-max gap-4 p-2 border border-gray-600">
-        <div className="rounded-md p-1">
-          <svg
-            xmlnsXlink="http://www.w3.org/1999/xlink"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-7 h-7 cursor-pointer hover:scale-110 hover:stroke-primary"
-            width="1"
-            height="1"
-          >
-            <path
-              d="M9.456 4.216l-5.985 7.851c-.456.637-.583 1.402-.371 2.108l.052.155a2.384 2.384 0 002.916 1.443l2.876-.864.578 4.042a2.384 2.384 0 002.36 2.047h.234l.161-.006a2.384 2.384 0 002.2-2.041l.576-4.042 2.877.864a2.384 2.384 0 002.625-3.668L14.63 4.33a3.268 3.268 0 00-5.174-.115zm3.57.613c.16.114.298.253.411.411l5.897 7.736a.884.884 0 01-.973 1.36l-3.563-1.069a.884.884 0 00-1.129.722l-.678 4.75a.884.884 0 01-.875.759h-.234a.884.884 0 01-.875-.76l-.679-4.75a.884.884 0 00-1.128-.72l-3.563 1.068a.884.884 0 01-.973-1.36L10.56 5.24a1.767 1.767 0 012.465-.41z"
-              fill="#A8B3CF"
-              fill-rule="evenodd"
-            ></path>
-          </svg>
+        <div onClick={() => updateUpVote()} className="rounded-md p-1">
+          {!vote?.upVote ? (
+            <svg
+              name="upVote"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-7 h-7 cursor-pointer hover:scale-110 hover:stroke-primary"
+              width="1"
+              height="1"
+            >
+              <path
+                d="M9.456 4.216l-5.985 7.851c-.456.637-.583 1.402-.371 2.108l.052.155a2.384 2.384 0 002.916 1.443l2.876-.864.578 4.042a2.384 2.384 0 002.36 2.047h.234l.161-.006a2.384 2.384 0 002.2-2.041l.576-4.042 2.877.864a2.384 2.384 0 002.625-3.668L14.63 4.33a3.268 3.268 0 00-5.174-.115zm3.57.613c.16.114.298.253.411.411l5.897 7.736a.884.884 0 01-.973 1.36l-3.563-1.069a.884.884 0 00-1.129.722l-.678 4.75a.884.884 0 01-.875.759h-.234a.884.884 0 01-.875-.76l-.679-4.75a.884.884 0 00-1.128-.72l-3.563 1.068a.884.884 0 01-.973-1.36L10.56 5.24a1.767 1.767 0 012.465-.41z"
+                fill="#A8B3CF"
+                fill-rule="evenodd"
+              ></path>
+            </svg>
+          ) : (
+            <svg
+              name="upVoteFilled"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-7 h-7 cursor-pointer hover:scale-110 hover:stroke-primary"
+            >
+              <path
+                d="M13.234 3.395c.191.136.358.303.494.493l7.077 9.285a1.06 1.06 0 01-1.167 1.633l-4.277-1.284a1.06 1.06 0 00-1.355.866l-.814 5.701a1.06 1.06 0 01-1.05.911h-.281a1.06 1.06 0 01-1.05-.91l-.815-5.702a1.06 1.06 0 00-1.355-.866l-4.276 1.284a1.06 1.06 0 01-1.167-1.633l7.077-9.285a2.121 2.121 0 012.96-.493z"
+                fill="#0074e9"
+                fill-rule="evenodd"
+              ></path>
+            </svg>
+          )}
         </div>
-        <div className="rounded-md p-1">
-          <svg
-            xmlnsXlink="http://www.w3.org/1999/xlink"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-7 h-7 cursor-pointer hover:scale-110 hover:stroke-primary transform rotate-180"
-            width="1"
-            height="1"
-          >
-            <path
-              d="M9.456 4.216l-5.985 7.851c-.456.637-.583 1.402-.371 2.108l.052.155a2.384 2.384 0 002.916 1.443l2.876-.864.578 4.042a2.384 2.384 0 002.36 2.047h.234l.161-.006a2.384 2.384 0 002.2-2.041l.576-4.042 2.877.864a2.384 2.384 0 002.625-3.668L14.63 4.33a3.268 3.268 0 00-5.174-.115zm3.57.613c.16.114.298.253.411.411l5.897 7.736a.884.884 0 01-.973 1.36l-3.563-1.069a.884.884 0 00-1.129.722l-.678 4.75a.884.884 0 01-.875.759h-.234a.884.884 0 01-.875-.76l-.679-4.75a.884.884 0 00-1.128-.72l-3.563 1.068a.884.884 0 01-.973-1.36L10.56 5.24a1.767 1.767 0 012.465-.41z"
-              fill="#A8B3CF"
-              fill-rule="evenodd"
-            ></path>
-          </svg>
+        <div onClick={() => updateDownVote()} className="rounded-md p-1">
+          {!vote?.downVote ? (
+            <svg
+              name="downVote"
+              xmlnsXlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-7 h-7 cursor-pointer hover:scale-110 hover:stroke-primary transform rotate-180"
+              width="1"
+              height="1"
+            >
+              <path
+                d="M9.456 4.216l-5.985 7.851c-.456.637-.583 1.402-.371 2.108l.052.155a2.384 2.384 0 002.916 1.443l2.876-.864.578 4.042a2.384 2.384 0 002.36 2.047h.234l.161-.006a2.384 2.384 0 002.2-2.041l.576-4.042 2.877.864a2.384 2.384 0 002.625-3.668L14.63 4.33a3.268 3.268 0 00-5.174-.115zm3.57.613c.16.114.298.253.411.411l5.897 7.736a.884.884 0 01-.973 1.36l-3.563-1.069a.884.884 0 00-1.129.722l-.678 4.75a.884.884 0 01-.875.759h-.234a.884.884 0 01-.875-.76l-.679-4.75a.884.884 0 00-1.128-.72l-3.563 1.068a.884.884 0 01-.973-1.36L10.56 5.24a1.767 1.767 0 012.465-.41z"
+                fill="#A8B3CF"
+                fill-rule="evenodd"
+              ></path>
+            </svg>
+          ) : (
+            <svg
+              name="downVoteFilled"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-7 h-7 cursor-pointer hover:scale-110 hover:stroke-primary transform rotate-180"
+            >
+              <path
+                d="M13.234 3.395c.191.136.358.303.494.493l7.077 9.285a1.06 1.06 0 01-1.167 1.633l-4.277-1.284a1.06 1.06 0 00-1.355.866l-.814 5.701a1.06 1.06 0 01-1.05.911h-.281a1.06 1.06 0 01-1.05-.91l-.815-5.702a1.06 1.06 0 00-1.355-.866l-4.276 1.284a1.06 1.06 0 01-1.167-1.633l7.077-9.285a2.121 2.121 0 012.96-.493z"
+                fill="#0074e9"
+                fill-rule="evenodd"
+              ></path>
+            </svg>
+          )}
         </div>
       </div>
-      <div onClick={() => handleClick()} className="flex justify-around w-full">
-        <div className="peer flex gap-2 items-center cursor-pointer hover:text-primary">
+      <div className="flex justify-around w-full">
+        <div
+          onClick={() => handleClick()}
+          className="peer flex gap-2 items-center cursor-pointer hover:text-primary"
+        >
           <svg
+            name="comments"
             viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg"
             className="w-7 h-7 cursor-pointer peer-hover:stroke-primary"
@@ -70,6 +152,7 @@ const InteractionPanel = ({
         </div>
         <div className="peer flex gap-2 items-center cursor-pointer hover:text-primary">
           <svg
+            name="bookmark"
             viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg"
             className="w-7 h-7 cursor-pointer fill-current peer-hover:text-primary"
@@ -93,21 +176,22 @@ const InteractionPanel = ({
           </svg> */}
           <p className="font-semibold peer-hover:text-primary">Bookmark</p>
         </div>
-
-        <div className="peer flex gap-2 items-center cursor-pointer hover:text-primary">
-          <svg
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-7 h-7 cursor-pointer fill-current peer-hover:text-primary"
-          >
-            <path
-              d="M13.2 4.096a3.743 3.743 0 015.148-.137l.144.137 1.412 1.412a3.743 3.743 0 01.137 5.148l-.137.144-4.023 4.023a3.743 3.743 0 01-5.148.137l-.144-.137-.706-.706a.749.749 0 01.982-1.125l.076.067.706.705c.84.84 2.181.876 3.063.105l.113-.105 4.022-4.022c.84-.84.876-2.181.105-3.064l-.105-.112-1.411-1.411a2.246 2.246 0 00-3.063-.105l-.113.105L13.2 6.213a.749.749 0 01-1.126-.982l.067-.076L13.2 4.096zM8.119 9.177a3.743 3.743 0 015.148-.137l.144.137.706.706a.749.749 0 01-.982 1.125l-.076-.067-.706-.705a2.246 2.246 0 00-3.063-.105l-.113.105-4.022 4.022a2.246 2.246 0 00-.105 3.064l.105.112 1.411 1.411c.84.84 2.181.876 3.063.105l.113-.105 1.058-1.058a.749.749 0 011.126.982l-.067.076-1.059 1.059a3.743 3.743 0 01-5.148.137l-.144-.137-1.412-1.412a3.743 3.743 0 01-.137-5.148l.137-.144L8.12 9.177z"
-              fill="currentColor"
-              fill-rule="evenodd"
-            ></path>
-          </svg>
-          <p className="font-semibold peer-hover:text-primary">Copy</p>
-        </div>
+        <CopyLinkComponent link={link}>
+          <div className="peer flex gap-2 items-center cursor-pointer hover:text-primary">
+            <svg
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-7 h-7 cursor-pointer fill-current peer-hover:text-primary"
+            >
+              <path
+                d="M13.2 4.096a3.743 3.743 0 015.148-.137l.144.137 1.412 1.412a3.743 3.743 0 01.137 5.148l-.137.144-4.023 4.023a3.743 3.743 0 01-5.148.137l-.144-.137-.706-.706a.749.749 0 01.982-1.125l.076.067.706.705c.84.84 2.181.876 3.063.105l.113-.105 4.022-4.022c.84-.84.876-2.181.105-3.064l-.105-.112-1.411-1.411a2.246 2.246 0 00-3.063-.105l-.113.105L13.2 6.213a.749.749 0 01-1.126-.982l.067-.076L13.2 4.096zM8.119 9.177a3.743 3.743 0 015.148-.137l.144.137.706.706a.749.749 0 01-.982 1.125l-.076-.067-.706-.705a2.246 2.246 0 00-3.063-.105l-.113.105-4.022 4.022a2.246 2.246 0 00-.105 3.064l.105.112 1.411 1.411c.84.84 2.181.876 3.063.105l.113-.105 1.058-1.058a.749.749 0 011.126.982l-.067.076-1.059 1.059a3.743 3.743 0 01-5.148.137l-.144-.137-1.412-1.412a3.743 3.743 0 01-.137-5.148l.137-.144L8.12 9.177z"
+                fill="currentColor"
+                fill-rule="evenodd"
+              ></path>
+            </svg>
+            <p className="font-semibold peer-hover:text-primary">Copy</p>
+          </div>
+        </CopyLinkComponent>
       </div>
     </div>
   );

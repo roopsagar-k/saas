@@ -1,20 +1,24 @@
-import type { Post } from "@/app/types/types";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import type {
+  Post as PostType,
+  Comment as CommentType,
+  Vote,
+} from "@/app/types/types";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Button } from "@/components/ui/button";
 import InteractionPanel from "@/components/InteractionPanel";
 import PaperViewDialog from "@/components/PaperViewDialog";
-import { Tag } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
 import Comment from "@/components/Comment";
 import CommentSection from "@/components/CommentSection";
-import type { Comment as CommentType } from "@/app/types/types";
+import { Tag } from "lucide-react";
+import type { UserVoteType } from "@/app/types/types";
 
 interface PostComponentProps {
-  post: Post;
-  descriptionLength: string;
+  post: PostType;
+  descriptionLength: "half" | "full";
   id: string;
 }
 
@@ -27,49 +31,84 @@ const Post: React.FC<PostComponentProps> = ({
   const [comments, setComments] = useState<CommentType[]>([]);
   const [comment, setComment] = useState<string>("");
   const [showTextArea, setShowTextArea] = useState<boolean>(false);
-  let maxLengthOfDescription: number;
-  if (descriptionLength === "half") {
-    maxLengthOfDescription = 500;
-  } else {
-    maxLengthOfDescription = post?.tests.description.length;
-  }
+  const [totalUpVotes, setTotalUpVotes] = useState<number>(0);
+  const [vote, setVote] = useState<UserVoteType>();
+  const [commentMessage, setCommentMessage] = useState<string>("");
+  const [triggerFetchComments, setTriggerFetchComments] = useState<boolean>(false);
+  const maxLengthOfDescription =
+    descriptionLength === "half" ? 500 : post?.tests.description.length;
+
   useEffect(() => {
-    async function fetchComments() {
+    const fetchComments = async () => {
       const response = await axios.get(`/api/comments/${id}`);
-      console.log(response.data);
       setComments(response.data);
-    }
+    };
     fetchComments();
-  }, [comment, comments]);
+  }, [id, comment, commentMessage, triggerFetchComments]);
+
+  useEffect(() => {
+    const getTotalUpVotes = async () => {
+      if (id) {
+        try {
+          const response = await axios.get(`/api/votes/${id}/all`);
+          setTotalUpVotes(
+            response.data.filter((vote: Vote) => vote.upVote).length
+          );
+        } catch (error) {
+          console.error("Error fetching votes:", error);
+        }
+      }
+    };
+    getTotalUpVotes();
+  }, [vote]);
+
+  useEffect(() => {
+    const fetchVotes = async () => {
+      if (id) {
+        try {
+          const response = await axios.get(`/api/votes/${id}`);
+          setVote(response.data);
+        } catch (error) {
+          console.error("Error fetching votes:", error);
+        }
+      }
+    };
+    fetchVotes();
+  }, [id]);
+
+  const handleReadMore = () => {
+    router.push(`/home/post/${id}`);
+  };
+
+  const handleTakeTest = () => {
+    router.push(`tests/${id}`);
+  };
+
   return (
     <div>
-      <Card key={post?.tests?.id} className="min-w-[55rem] py-6 px-8">
-        <div className="flex items-center overflow-hidden gap-4">
-          <Avatar className="cursor-pointer text-center size-16 flex items-center ">
+      <Card key={id} className="min-w-[55rem] py-6 px-8">
+        <div className="flex items-center gap-4">
+          <Avatar className="cursor-pointer text-center size-16 flex items-center">
             <AvatarImage
               className="rounded-lg"
               src="https://github.com/shadcn.png"
             />
             <AvatarFallback>{post?.users?.name?.charAt(0)}</AvatarFallback>
           </Avatar>
-          <div className="flex flex-col justify-center">
+          <div className="flex flex-col">
             <p className="font-semibold">{post?.users?.name}</p>
-            <p className="text-gray-300">{"@" + post?.users?.userName}</p>
+            <p className="text-gray-300">@{post?.users?.userName}</p>
           </div>
         </div>
-        <h3 className="mt-8 scroll-m-20 text-2xl font-semibold tracking-tight">
+        <h3 className="mt-8 text-2xl font-semibold tracking-tight">
           {post?.tests?.title}
         </h3>
-        <p className="leading-7 mt-4">
+        <p className="mt-4 leading-7">
           {post?.tests?.description.length > maxLengthOfDescription
-            ? post?.tests?.description.slice(0, maxLengthOfDescription) + "..."
+            ? `${post?.tests?.description.slice(0, maxLengthOfDescription)}...`
             : post?.tests?.description}
           {post?.tests?.description.length > maxLengthOfDescription && (
-            <Button
-              onClick={() => router.push(`/home/post/${post?.tests?.id}`)}
-              className="-ml-4"
-              variant="link"
-            >
+            <Button onClick={handleReadMore} className="-ml-4" variant="link">
               read more
             </Button>
           )}
@@ -77,24 +116,22 @@ const Post: React.FC<PostComponentProps> = ({
         <div className="mt-4 font-semibold">
           <p className="flex gap-2 items-center">
             <Tag className="transform rotate-90" stroke="#A8B3CF" />
-            {"Tags: "}
-            <span className="text-primary">{post?.tests?.tags}</span>
+            Tags: <span className="text-primary">{post?.tests?.tags}</span>
           </p>
-          <div className="flex mt-4 gap-4 text-[#A8B3CF]">
-            <p>{comments?.length + " " + "Comments"}</p>
+          <div className="mt-4 flex gap-4 text-[#A8B3CF]">
+            <p>
+              {comments.length} Comments | {totalUpVotes} Upvotes
+            </p>
           </div>
         </div>
         <div>
           <PaperViewDialog questions={post?.tests?.questions!} />
-          <Button
-            onClick={() => router.push(`tests/${post?.tests?.id}`)}
-            className="w-full mt-2"
-          >
+          <Button onClick={handleTakeTest} className="w-full mt-2">
             Take Test
           </Button>
         </div>
         <div>
-          <InteractionPanel post={post} />
+          <InteractionPanel post={post} vote={vote!} setVote={setVote} />
         </div>
         {descriptionLength === "full" && (
           <>
@@ -102,14 +139,20 @@ const Post: React.FC<PostComponentProps> = ({
               <Comment
                 showTextArea={showTextArea}
                 setShowTextArea={setShowTextArea}
-                post={post as Post}
+                post={post}
                 comment={comment}
                 setComment={setComment}
               />
             </div>
             <div className="mt-8">
               {comments.length > 0 && (
-                <CommentSection comments={comments} postId={id as string} />
+                <CommentSection
+                  commentMessage={commentMessage}
+                  setCommentMessage={setCommentMessage}
+                  comments={comments}
+                  postId={id}
+                  setTriggerFetchComments={setTriggerFetchComments}
+                />
               )}
             </div>
           </>

@@ -97,9 +97,34 @@ export type ChildrenComment = {
     userId: string;
     postId: string;
     user: CredentialsType;
+    recipient: CredentialsType;
   }[];
 };
 export type Comment = {
   comments: ParentComment & ChildrenComment & CredentialsType;
   users: CredentialsType;
 };
+
+
+export type Vote = {
+  id: string;
+  upVote: boolean;
+  downVote: false;
+  userId: string;
+  postId: string;
+};
+
+export type UserVoteType = {
+  postId: string;
+  upVote: boolean;
+  downVote: boolean;
+};
+
+export type NestedComment = {
+  id: string;
+  message: string;
+  createdAt: Date;
+  userId: string;
+  recipientId?: string;
+  postId: string;
+}

@@ -7,7 +7,6 @@ import { eq } from "drizzle-orm";
 
 export async function POST(request: Request) {
   const { email, password } = await request.json();
-  console.log(email, password);
   const hashedPassword = await bcrypt.hash(password, 10);
   try {
     const result = await db

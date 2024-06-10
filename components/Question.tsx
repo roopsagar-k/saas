@@ -55,7 +55,7 @@ const Question: React.FC<QuestionProps> = ({
               Save & exit
             </Button>
           )}
-          {/* <Timer timeInMinutes={test?.duration!} /> */}
+          <Timer timeInMinutes={test?.duration!} />
         </div>
       </div>
       <Card className="my-4 mb-12 w-full flex-grow overflow-auto px-6 border border-2">

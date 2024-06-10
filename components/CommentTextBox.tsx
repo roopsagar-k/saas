@@ -11,7 +11,8 @@ interface CommentTextBoxProps {
   comment: string;
   commentTo?: string;
   setComment: React.Dispatch<React.SetStateAction<string>>;
-  handleClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  handleClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, recipientId: string) => void;
+  recipientId: string;
 }
 const CommentTextBox: React.FC<CommentTextBoxProps> = ({
   showTextArea,
@@ -20,6 +21,7 @@ const CommentTextBox: React.FC<CommentTextBoxProps> = ({
   setComment,
   handleClick,
   commentTo,
+  recipientId,
 }) => {
   return (
     <Card
@@ -49,7 +51,7 @@ const CommentTextBox: React.FC<CommentTextBoxProps> = ({
           <Button
             disabled={comment?.trim().length === 0}
             className="w-full h-12 mt-4 rounded-md"
-            onClick={(e) => handleClick(e)}
+            onClick={(e) => handleClick(e, recipientId)}
           >
             Comment
           </Button>

@@ -78,13 +78,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 (totalUsers + 1).toString(),
             });
           } else {
-            await db
-              .update(UserTable)
-              .set({
-                id: user.id,
-                password: "google-auth",
-              })
-              .where(eq(UserTable.email, profile?.email!));
+            //   await db
+            //     .update(UserTable)
+            //     .set({
+            //       id: user.id,
+            //       password: "google-auth",
+            //     })
+            //     .where(eq(UserTable.email, profile?.email!));
           }
           return true;
         }
@@ -106,14 +106,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               userName: profile?.username + (totalUsers + 1).toString(),
             });
           } else {
-            await db
-              .update(UserTable)
-              .set({
-                id: user.id,
-                password: "discord-auth",
-                name: profile?.name!,
-              })
-              .where(eq(UserTable.email, profile?.email!));
+            // await db
+            //   .update(UserTable)
+            //   .set({
+            //     id: user.id,
+            //     password: "discord-auth",
+            //     name: profile?.name!,
+            //   })
+            //   .where(eq(UserTable.email, profile?.email!));
           }
           return true;
         }
@@ -121,26 +121,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
     },
     async jwt({ token, user, account }) {
+      const User = await db
+        .select()
+        .from(UserTable)
+        .where(eq(UserTable.email, token?.email!));
+
       if (account?.provider === "google" || account?.provider === "discord") {
-        const User = await db
-          .select()
-          .from(UserTable)
-          .where(eq(UserTable.email, token?.email!));
         if (User.length > 0) {
           console.log("User found from jwt: ", User);
           token.id = User[0].id?.toString();
+          user.id = User[0].id?.toString();
           console.log("token from jwt: ", token);
         }
       }
 
       if (user) {
-        token.id = user.id?.toString();
+        token.id = User[0]?.id?.toString();
         token.email = user.email?.toString();
       }
 
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token, user }) {
+      console.log("token sub: ", token.sub);
       if (token) {
         session.user.id = token.id?.toString()!;
         session.user.email = token.email?.toString()!;
@@ -150,5 +153,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   pages: {
     signIn: "/login",
+  },
+  cookies: {
+    pkceCodeVerifier: {
+      name: "next-auth.pkce.code_verifier",
+      options: {
+        httpOnly: true,
+        sameSite: "none",
+        path: "/",
+        secure: true,
+      },
+    },
   },
 });
