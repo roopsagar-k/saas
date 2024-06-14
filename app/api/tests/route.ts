@@ -33,6 +33,7 @@ export const POST = auth(async function POST(req) {
       ownTest: data.ownTest,
       privatePost: data.privatePost,
       userId: id,
+      createdAt: Date.now().toString(),
     })
     .returning({ testId: TestTable.id });
   console.log("response: testid ", response);

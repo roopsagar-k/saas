@@ -6,6 +6,7 @@ import CommentSectionInteractionPannel from "./CommentSectionInteractionPannel";
 import CommentTextBox from "./CommentTextBox";
 import { useUserContext } from "@/context/UserContext";
 import axios from "axios";
+import { formatDistanceToNow } from "date-fns";
 
 interface CommentSectionProps {
   comments: Comment[];
@@ -26,6 +27,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const [commentId, setCommentId] = useState<string>("");
   const [isNestedComment, setIsNestedComment] = useState<boolean>(false);
   const [nestedCommentId, setNestedCommentId] = useState<string>();
+  const [onViewColor, setOnViewColor] = useState<boolean>(false);
+  const [scrollCommentId, setOnScrollCommentId] = useState<string>("");
   const { user, setUser } = useUserContext();
 
   const handleClick = async (
@@ -42,34 +45,39 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     setShowTextArea(false);
   };
 
-   const commentRefs = useRef<{ [key: string]: HTMLDivElement }>({});
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      const commentId = hash.substring(1);
+      const comment = document.getElementById(commentId);
+      setOnScrollCommentId(commentId)
+      comment?.scrollIntoView({ behavior: "instant" });
+      updateColor();
+    }
+  }, []);
 
-   useEffect(() => {
-     const hash = window.location.hash;
-     if (hash) {
-       const commentId = hash.substring(1);
-       const commentRef = commentRefs.current[commentId];
-       if (commentRef) {
-         commentRef.scrollIntoView({ behavior: "smooth" });
-       }
-     }
-   }, []);
+  function updateColor() {
+    setOnViewColor(true);
+    setTimeout(() => {
+      setOnViewColor(false);
+    }, 10000);
+  }
 
   return (
     <Card className="relative flex flex-col gap-8">
       {comments.map((comment) => (
-        <div
-          key={comment.comments.id}
-          ref={(ref) => {
-            commentRefs.current[comment.comments.id] = ref!;
-          }}
-        >
-          <Card className="p-4" id={`comment-${comment.comments.id}`}>
+        <div key={comment.comments.id}>
+          <Card
+            className={`p-4 ${
+              (scrollCommentId == "comment-" + comment.comments.id && onViewColor) && "bg-accent"
+            }`}
+            id={`comment-${comment.comments.id}`}
+          >
             <div className="flex items-center overflow-hidden gap-4">
               <Avatar className="cursor-pointer size-12 flex items-center text-center">
                 <AvatarImage
                   className="rounded-lg"
-                  src="https://github.com/shadcn.png"
+                  src={comment?.users?.imgUrl}
                 />
                 <AvatarFallback className="text-center">{"R"}</AvatarFallback>
               </Avatar>
@@ -91,6 +99,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({
               showMenu={comment.comments.userId === user?.id}
               commentMessage={comment?.comments?.message}
               setTriggerFetchComments={setTriggerFetchComments}
+              postTime={formatDistanceToNow(
+                new Date(parseInt(comment.comments.createdAt)),
+                {
+                  addSuffix: true,
+                }
+              )}
             />
           </Card>
           <div className="w-[95%] ml-auto">
@@ -99,13 +113,16 @@ const CommentSection: React.FC<CommentSectionProps> = ({
                 <div className="w-1 bg-blue-600 min-h-full"></div>
                 <Card
                   id={`comment-${nestedComment.id}`}
-                  className="p-4 flex-1 mt-4"
+                  className={`p-4 flex-1 mt-4 ${
+                    (scrollCommentId == "comment-" + nestedComment.id && onViewColor) &&
+                    "bg-accent"
+                  }`}
                 >
                   <div className="flex items-center overflow-hidden gap-4">
                     <Avatar className="cursor-pointer size-12 flex items-center text-center">
                       <AvatarImage
                         className="rounded-lg"
-                        src="https://github.com/shadcn.png"
+                        src={nestedComment.user.imgUrl}
                       />
                       <AvatarFallback className="text-center">
                         {"R"}
@@ -138,13 +155,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({
                     showMenu={nestedComment.userId === user?.id}
                     commentMessage={nestedComment?.message}
                     setTriggerFetchComments={setTriggerFetchComments}
+                    postTime={formatDistanceToNow(
+                      new Date(nestedComment.createdAt),
+                      {
+                        addSuffix: true,
+                      }
+                    )}
                   />
                 </Card>
               </div>
             ))}
           </div>
           <div>
-            {showTextArea && (
+            {showTextArea && comment.comments.id === commentId && (
               <CommentTextBox
                 name={user?.name as string}
                 showTextArea={showTextArea}

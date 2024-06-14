@@ -5,6 +5,7 @@ import { Post } from "@/app/types/types";
 import classNames from "classnames";
 import axios from "axios";
 import CommentTextBox from "./CommentTextBox";
+import { useUserContext } from "@/context/UserContext";
 
 interface CommentProps {
   post: Post;
@@ -13,6 +14,7 @@ interface CommentProps {
   comment: string;
   setComment: React.Dispatch<React.SetStateAction<string>>;
 }
+
 const Comment: React.FC<CommentProps> = ({
   post,
   showTextArea,
@@ -31,6 +33,8 @@ const Comment: React.FC<CommentProps> = ({
       console.error(error);
     }
   };
+
+  const { user } = useUserContext();
   return (
     <>
       <Card
@@ -42,10 +46,7 @@ const Comment: React.FC<CommentProps> = ({
       >
         <div className="flex gap-4 text-gray-300 mx-1">
           <Avatar className="cursor-pointer size-16 flex items-center">
-            <AvatarImage
-              className="rounded-lg"
-              src="https://github.com/shadcn.png"
-            />
+            <AvatarImage className="rounded-lg" src={user?.image} />
             <AvatarFallback>{post?.users?.name?.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex gap-4 items-center">

@@ -68,27 +68,27 @@ const SideBar = () => {
     );
   };
 
-  const Stared = () => {
+  const BookMark = () => {
     return (
       <div
-        onClick={() => router.replace("/stared")}
+        onClick={() => router.replace("/bookmark")}
         className={classNames(btnClass, {
-          "bg-primary text-white": pathName === "/stared",
-          "hover:bg-primary": pathName === "/stared",
-          "hover:bg-accent": pathName !== "/stared",
+          "bg-primary text-white": pathName === "/bookmark",
+          "hover:bg-primary": pathName === "/bookmark",
+          "hover:bg-accent": pathName !== "/bookmark",
         })}
       >
         <svg
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-7 h-7 pointer-events-none"
-          >
-            <path
-              d="M16.444 3c1.178 0 2.152.917 2.224 2.092l.926 15.317a.557.557 0 01-.887.482l-6.247-4.616c-.394-.29-.931-.29-1.324 0L4.888 20.89a.557.557 0 01-.887-.482l.926-15.317A2.228 2.228 0 017.15 3h9.293z"
-              fill="currentColor"
-              fill-rule="evenodd"
-            ></path>
-          </svg>
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-7 h-7 pointer-events-none"
+        >
+          <path
+            d="M16.444 3c1.178 0 2.152.917 2.224 2.092l.926 15.317a.557.557 0 01-.887.482l-6.247-4.616c-.394-.29-.931-.29-1.324 0L4.888 20.89a.557.557 0 01-.887-.482l.926-15.317A2.228 2.228 0 017.15 3h9.293z"
+            fill="currentColor"
+            fill-rule="evenodd"
+          ></path>
+        </svg>
         {expanded && <span>Bookmarks</span>}
       </div>
     );
@@ -286,7 +286,7 @@ const SideBar = () => {
           classNames="absolute  left-12"
           expanded={expanded}
         >
-          <Stared />
+          <BookMark />
         </ToolTip>
         <ToolTip
           content="Tests created"

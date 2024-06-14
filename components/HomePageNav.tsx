@@ -5,9 +5,11 @@ import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "./ui/button";
+import { useUserContext } from "@/context/UserContext";
 
 const HomePageNav = () => {
   const { theme, setTheme } = useTheme();
+  const { user } = useUserContext();
   function toggleTheme(): void {
     theme === "light" ? setTheme("dark") : setTheme("light");
   }
@@ -53,7 +55,7 @@ const HomePageNav = () => {
         <Avatar className="cursor-pointer size-12 rounded-sm">
           <AvatarImage
             className="rounded-lg"
-            src="https://github.com/shadcn.png"
+            src={user?.image}
           />
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>

@@ -22,8 +22,7 @@ const TestsCreated = () => {
   useEffect(() => {
     async function fetchData() {
       const response = await axios.get("/api/tests");
-      console.log("tests response: ", response.data);
-      setTests(response.data);
+      setTests(response?.data);
       console.log("tests: ", tests);
     }
     fetchData();
@@ -84,8 +83,7 @@ const TestsCreated = () => {
                 <CardDescription>
                   {" "}
                   {test.description.length > 400
-                    ? test.description.slice(0, 400) +
-                      "..."
+                    ? test.description.slice(0, 400) + "..."
                     : test.description}
                 </CardDescription>
               </CardContent>
@@ -97,6 +95,7 @@ const TestsCreated = () => {
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="18"
+                          name="clock"
                           height="18"
                           viewBox="0 0 24 24"
                           fill="none"
@@ -118,6 +117,7 @@ const TestsCreated = () => {
                           xmlns="http://www.w3.org/2000/svg"
                           width="18"
                           height="18"
+                          name="tag"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
@@ -134,7 +134,10 @@ const TestsCreated = () => {
                             fill="currentColor"
                           />
                         </svg>
-                        Tags: {test.tags}
+                        Tags:{" "}
+                        {test.tags.length > 40
+                          ? test.tags.slice(0, 40) + "..."
+                          : test.tags}
                       </span>
                     </div>
                   </div>

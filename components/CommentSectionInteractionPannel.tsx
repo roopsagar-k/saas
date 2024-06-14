@@ -33,6 +33,7 @@ interface Props {
   showMenu: boolean;
   commentMessage: string;
   setTriggerFetchComments: React.Dispatch<React.SetStateAction<boolean>>;
+  postTime: string;
 }
 
 const CommentSectionInteractionPannel: React.FC<Props> = ({
@@ -47,6 +48,7 @@ const CommentSectionInteractionPannel: React.FC<Props> = ({
   showMenu,
   commentMessage,
   setTriggerFetchComments,
+  postTime,
 }) => {
   const [updatedMessage, setUpdatedMessage] = useState<string>();
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
@@ -55,32 +57,31 @@ const CommentSectionInteractionPannel: React.FC<Props> = ({
   const [upVote, setUpVote] = useState<boolean>(false);
   const [downVote, setDownVote] = useState<boolean>(false);
   const [count, setCount] = useState<number>(0);
-  const [triggerUseEffect, setTriggerUseEffect] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetchCommentsVotes() {
       if (!nested) {
         const response = await axios.get(`api/comments/votes/${id}`);
-        const { commentVotes, count } = response.data;
+        const { commentVotes, count: voteCount } = response.data;
         if (commentVotes) {
           setUpVote(commentVotes.upVote);
           setDownVote(commentVotes.downVote);
         }
-        setCount(count);
+        setCount(voteCount);
       } else {
         const response = await axios.get(
           `api/comments/votes/${id}/nested/${nestedCommentId}`
         );
-        const { commentVotes, count } = response.data;
+        const { commentVotes, count: voteCount } = response.data;
         if (commentVotes) {
           setUpVote(commentVotes.upVote);
           setDownVote(commentVotes.downVote);
         }
-        setCount(count);
+        setCount(voteCount);
       }
     }
     fetchCommentsVotes();
-  }, [id, nested, nestedCommentId, triggerUseEffect]);
+  }, [id, nested, nestedCommentId]);
 
   const updateComment = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -115,30 +116,36 @@ const CommentSectionInteractionPannel: React.FC<Props> = ({
   };
 
   const updateCommentUpVote = async () => {
-    await axios.put(`api/comments/votes/${id}`, {
+    console.log("clicked upvote", !upVote, !upVote ? false : downVote);
+    const result = await axios.put(`api/comments/votes/${id}`, {
       nested,
       votes: { upVote: !upVote, downVote: !upVote ? false : downVote },
       nestedCommentId,
     });
-    setUpVote(!upVote);
-    setDownVote(!upVote ? false : downVote);
-    setTriggerUseEffect((prevTrigger) => !prevTrigger);
+    setUpVote((prev) => !prev);
+    setDownVote((prev) => (!upVote ? false : prev));
+    setCount(result.data.count);
   };
 
   const updateCommentDownVote = async () => {
-    await axios.put(`api/comments/votes/${id}`, {
+    console.log("clicked downvote");
+    const result = await axios.put(`api/comments/votes/${id}`, {
       nested,
       votes: { upVote: !downVote ? false : upVote, downVote: !downVote },
       nestedCommentId,
     });
-    setDownVote(!downVote);
-    setUpVote(!downVote ? false : upVote);
-    setTriggerUseEffect((prevTrigger) => !prevTrigger);
+    setDownVote((prev) => !prev);
+    setUpVote((prev) => (!downVote ? false : prev));
+    setCount(result.data.count);
   };
 
   const pathname = usePathname();
-  const link = "http://localhost:3000/" + pathname + "#comment-" + (nested ? nestedCommentId : id);
-  
+  const link =
+    "http://localhost:3000/" +
+    pathname +
+    "#comment-" +
+    (nested ? nestedCommentId : id);
+
   return (
     <div className="flex mt-4 justify-between">
       <div className="flex gap-4">
@@ -404,7 +411,9 @@ const CommentSectionInteractionPannel: React.FC<Props> = ({
           </Popover>
         )}
       </div>
-      <div className="text-[#A8B3CF] font-semibold">{count + " "}Upvotes</div>
+      <div className="text-[#A8B3CF] font-semibold">
+        {count + " "}Upvotes{" "} | {" " + postTime}{" "}
+      </div>
     </div>
   );
 };

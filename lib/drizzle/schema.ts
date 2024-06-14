@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   date,
   integer,
@@ -15,6 +16,7 @@ export const UserTable = pgTable("users", {
   email: varchar("email", { length: 255 }).unique().notNull(),
   password: varchar("password", { length: 244 }).notNull(),
   name: text("name").notNull().default(""),
+  imgUrl: text("img_url").default(""),
   userName: text("user_name").notNull().default(""),
 });
 
@@ -27,9 +29,10 @@ export const TestTable = pgTable("tests", {
   ownTest: boolean("own_test").default(false),
   privatePost: boolean("private_post").default(false),
   questions: jsonb("questions").default([]).array(),
+  createdAt: text("created_at").default(Date.now().toString()),
   userId: uuid("user_id")
     .notNull()
-    .references(() => UserTable.id),
+    .references(() => UserTable.id, { onDelete: "cascade" }),
 });
 
 export const TestsTakenTable = pgTable("tests_taken", {
@@ -39,21 +42,32 @@ export const TestsTakenTable = pgTable("tests_taken", {
     .references(() => TestTable.id),
   userId: uuid("user_id")
     .notNull()
-    .references(() => UserTable.id),
+    .references(() => UserTable.id, { onDelete: "cascade" }),
   answers: jsonb("answers").default([]).array(),
-  duration: integer("duration").default(0),
+  minutes: integer("minutes").default(0),
+  seconds: integer("seconds").default(0),
+});
+
+export const BookMarkTable = pgTable("book_mark", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  postId: uuid("post_id")
+    .notNull()
+    .references(() => TestTable.id, { onDelete: "cascade" }),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => UserTable.id, { onDelete: "cascade" }),
 });
 
 export const CommentsTable = pgTable("comments", {
   id: uuid("id").primaryKey().defaultRandom(),
   message: text("message").notNull(),
-  createdAt: date("created_at").defaultNow(),
+  createdAt: text("created_at").default(Date.now().toString()),
   userId: uuid("user_id")
     .notNull()
-    .references(() => UserTable.id),
+    .references(() => UserTable.id, { onDelete: "cascade" }),
   postId: uuid("post_id")
     .notNull()
-    .references(() => TestTable.id),
+    .references(() => TestTable.id, { onDelete: "cascade" }),
   nestedComments: jsonb("children_comments").default([]).array(),
 });
 
@@ -64,10 +78,10 @@ export const VotesTable = pgTable("upvotes", {
   downVote: boolean("down_vote").default(false),
   userId: uuid("user_id")
     .notNull()
-    .references(() => UserTable.id),
+    .references(() => UserTable.id, { onDelete: "cascade" }),
   postId: uuid("post_id")
     .notNull()
-    .references(() => TestTable.id),
+    .references(() => TestTable.id, { onDelete: "cascade" }),
 });
 
 //upvotes and downvotes for comments
@@ -77,7 +91,7 @@ export const CommentsVotesTable = pgTable("comment_votes", {
   downVote: boolean("down_vote").default(false),
   userId: uuid("user_id")
     .notNull()
-    .references(() => UserTable.id),
+    .references(() => UserTable.id, { onDelete: "cascade" }),
   commentId: uuid("comment_id")
     .notNull()
     .references(() => CommentsTable.id, { onDelete: "cascade" })
@@ -91,10 +105,11 @@ export const NestedCommentsVotesTable = pgTable("nested_comment_votes", {
   downVote: boolean("down_vote").default(false),
   userId: uuid("user_id")
     .notNull()
-    .references(() => UserTable.id),
+    .references(() => UserTable.id, { onDelete: "cascade" }),
   commentId: uuid("comment_id")
     .notNull()
-    .references(() => CommentsTable.id, { onDelete: "cascade" }).notNull(),
+    .references(() => CommentsTable.id, { onDelete: "cascade" })
+    .notNull(),
   nestedCommentId: uuid("nested_comment_id").notNull(),
 });
 
@@ -130,6 +145,19 @@ export const TestsTakenTableRelations = relations(
     };
   }
 );
+
+export const BookMarkTableRelations = relations(BookMarkTable, ({ one }) => {
+  return {
+    test: one(TestTable, {
+      fields: [BookMarkTable.postId],
+      references: [TestTable.id],
+    }),
+    user: one(UserTable, {
+      fields: [BookMarkTable.userId],
+      references: [UserTable.id],
+    }),
+  };
+});
 
 export const CommentsTableRelations = relations(CommentsTable, ({ one }) => {
   return {

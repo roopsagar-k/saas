@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import classNames from "classnames";
+import { useUserContext } from "@/context/UserContext";
 
 interface CommentTextBoxProps {
   showTextArea: boolean;
@@ -12,7 +13,7 @@ interface CommentTextBoxProps {
   commentTo?: string;
   setComment: React.Dispatch<React.SetStateAction<string>>;
   handleClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, recipientId: string) => void;
-  recipientId: string;
+  recipientId?: string;
 }
 const CommentTextBox: React.FC<CommentTextBoxProps> = ({
   showTextArea,
@@ -21,8 +22,9 @@ const CommentTextBox: React.FC<CommentTextBoxProps> = ({
   setComment,
   handleClick,
   commentTo,
-  recipientId,
+  recipientId="",
 }) => {
+  const { user } = useUserContext();
   return (
     <Card
       className={classNames(
@@ -34,7 +36,7 @@ const CommentTextBox: React.FC<CommentTextBoxProps> = ({
         <Avatar className="cursor-pointer size-12 flex items-center">
           <AvatarImage
             className="rounded-lg"
-            src="https://github.com/shadcn.png"
+            src={user?.image}
           />
           <AvatarFallback>{name?.charAt(0)}</AvatarFallback>
         </Avatar>

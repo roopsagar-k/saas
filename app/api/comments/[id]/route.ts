@@ -50,6 +50,7 @@ export const POST = auth(async function POST(
     message: comment,
     postId: params.id,
     userId: req.auth?.user?.id!,
+    createdAt: Date.now().toString(),
   });
   return new Response(
     JSON.stringify({

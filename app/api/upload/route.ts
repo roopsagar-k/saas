@@ -3,7 +3,6 @@ import fs from "fs-extra";
 import { pipeline } from "stream";
 import { promisify } from "util";
 const pipelineAsync = promisify(pipeline);
-import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
 
 export async function POST(request: Request) {
@@ -20,6 +19,7 @@ export async function POST(request: Request) {
     uploadedFiles.push(fileName);
     await pipelineAsync(file.stream(), fs.createWriteStream(filePath));
   }
+  console.log(uploadedFiles, "file uploaded");
   return new Response(
     JSON.stringify({ message: "file uploaded", uploadedFiles }),
     {

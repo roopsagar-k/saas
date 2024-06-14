@@ -4,6 +4,8 @@ export type CredentialsType = {
   password?: string;
   name?: string;
   userName?: string;
+  imgUrl?: string;
+  image?: string;
 };
 
 export type OAuthType = {
@@ -11,6 +13,7 @@ export type OAuthType = {
   name?: string;
   email?: string;
   emailVerified?: boolean;
+  imgUrl?: string;
   image?: string;
 };
 
@@ -25,6 +28,7 @@ export type Test = {
   id?: string;
   title: string;
   duration: number;
+  createdAt: string;
   description: string;
   tags: string;
   ownTest: boolean;
@@ -61,25 +65,6 @@ export type Post = {
   tests: Test;
   users: CredentialsType;
 };
-
-[
-  {
-    id: "c033e922-d837-4a14-a08f-bfd84ff380cb",
-    message: "Hello this is roop here!.",
-    createdAt: "2024-05-22T18:30:00.000Z",
-    userId: "c8b6432e-4847-43a9-b2eb-69993b8944ca",
-    postId: "60625432-b570-477d-9193-49caaf0f9c01",
-    nestedComments: null,
-  },
-  {
-    id: "506ecab3-ec1d-42ff-ae63-5560ee558886",
-    message: "Hello this is roop again!",
-    createdAt: "2024-05-22T18:30:00.000Z",
-    userId: "c8b6432e-4847-43a9-b2eb-69993b8944ca",
-    postId: "60625432-b570-477d-9193-49caaf0f9c01",
-    nestedComments: null,
-  },
-];
 
 export type ParentComment = {
   id: string;
@@ -122,9 +107,22 @@ export type UserVoteType = {
 
 export type NestedComment = {
   id: string;
-  message: string;
-  createdAt: Date;
+  message: Date;
+  createdAt: string;
   userId: string;
   recipientId?: string;
   postId: string;
 }
+
+export type BookmarkType = {
+  id: string;
+  postId: string;
+  userId: string;
+}
+
+export type BookMarkJoinType = {
+  book_mark: BookmarkType;
+  tests: Test;
+  users: User;
+}
+

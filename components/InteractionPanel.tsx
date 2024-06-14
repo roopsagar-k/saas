@@ -1,16 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
+import { addToBookMark } from "@/lib/actions";
+import { removeBookMark } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 import { Post, Vote, UserVoteType } from "@/app/types/types";
 import axios from "@/axiosConfig";
 import CopyLinkComponent from "./CopyLinkComponent";
 import { usePathname } from "next/navigation";
+import { useUserContext } from "@/context/UserContext";
 
 interface InteractionPanelProps {
   setShowTextArea?: React.Dispatch<React.SetStateAction<boolean>>;
   post: Post;
   vote: UserVoteType;
   setVote: React.Dispatch<React.SetStateAction<UserVoteType | undefined>>;
+  setBookMarkUpdate: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const InteractionPanel: React.FC<InteractionPanelProps> = ({
@@ -18,15 +22,41 @@ const InteractionPanel: React.FC<InteractionPanelProps> = ({
   post,
   vote,
   setVote,
+  setBookMarkUpdate,
 }) => {
   const router = useRouter();
-  const pathname = usePathname();
+  const { user } = useUserContext();
+  const [isBookMark, setIsBookMark] = useState<boolean>(false);
+  const pathName = usePathname();
   let link = "http://localhost:3000/";
-  if (pathname === "/home") {
-    link += pathname + "/post/" + post?.tests.id;
-  } else {
-    link += pathname;
-  }
+  link += "home/post/" + post?.tests.id;
+
+  useEffect(() => {
+    async function fetchBookMarks() {
+      const response = await axios.get(
+        `api/bookmarks/${post?.tests?.id ?? pathName.split("/")[3]}`
+      );
+      if (response.data?.length! > 0) {
+        setIsBookMark(true);
+      } else {
+        setIsBookMark(false);
+      }
+    }
+    fetchBookMarks();
+  }, []);
+
+  const updateBookMark = async () => {
+    if (isBookMark) {
+      await removeBookMark(post?.tests?.id as string, user?.id as string);
+    } else {
+      await addToBookMark(post?.tests?.id as string, user?.id as string);
+    }
+    if (setBookMarkUpdate) {
+      setBookMarkUpdate((prev) => !prev);
+    }
+    setIsBookMark((prev) => !prev);
+  };
+
   const handleClick = () => {
     if (setShowTextArea) {
       setShowTextArea(true);
@@ -150,30 +180,36 @@ const InteractionPanel: React.FC<InteractionPanelProps> = ({
           </svg>
           <p className="font-semibold peer-hover:text-primary">Comment</p>
         </div>
-        <div className="peer flex gap-2 items-center cursor-pointer hover:text-primary">
-          <svg
-            name="bookmark"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-7 h-7 cursor-pointer fill-current peer-hover:text-primary"
-          >
-            <path
-              d="M15.874 3H8.126a3.357 3.357 0 00-3.35 3.152l-.772 12.77c-.028.459.106.915.38 1.286l.101.125c.666.764 1.818.9 2.647.287L12 17.023l4.868 3.597a1.964 1.964 0 003.128-1.7l-.771-12.767A3.358 3.358 0 0015.874 3zm0 1.5c.981 0 1.794.764 1.854 1.744l.771 12.768a.464.464 0 01-.74.402l-5.207-3.848a.929.929 0 00-1.104 0L6.24 19.414a.464.464 0 01-.74-.402l.773-12.768c.06-.98.872-1.744 1.853-1.744h7.748z"
-              fill="currentColor"
-              fill-rule="evenodd"
-            ></path>
-          </svg>
-          {/* <svg
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-7 h-7 pointer-events-none"
-          >
-            <path
-              d="M16.444 3c1.178 0 2.152.917 2.224 2.092l.926 15.317a.557.557 0 01-.887.482l-6.247-4.616c-.394-.29-.931-.29-1.324 0L4.888 20.89a.557.557 0 01-.887-.482l.926-15.317A2.228 2.228 0 017.15 3h9.293z"
-              fill="currentColor"
-              fill-rule="evenodd"
-            ></path>
-          </svg> */}
+        <div
+          onClick={updateBookMark}
+          className="peer flex gap-2 items-center cursor-pointer hover:text-primary"
+        >
+          {!isBookMark ? (
+            <svg
+              name="bookmark"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-7 h-7 cursor-pointer fill-current peer-hover:text-primary"
+            >
+              <path
+                d="M15.874 3H8.126a3.357 3.357 0 00-3.35 3.152l-.772 12.77c-.028.459.106.915.38 1.286l.101.125c.666.764 1.818.9 2.647.287L12 17.023l4.868 3.597a1.964 1.964 0 003.128-1.7l-.771-12.767A3.358 3.358 0 0015.874 3zm0 1.5c.981 0 1.794.764 1.854 1.744l.771 12.768a.464.464 0 01-.74.402l-5.207-3.848a.929.929 0 00-1.104 0L6.24 19.414a.464.464 0 01-.74-.402l.773-12.768c.06-.98.872-1.744 1.853-1.744h7.748z"
+                fill="currentColor"
+                fill-rule="evenodd"
+              ></path>
+            </svg>
+          ) : (
+            <svg
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-7 h-7 pointer-events-none"
+            >
+              <path
+                d="M16.444 3c1.178 0 2.152.917 2.224 2.092l.926 15.317a.557.557 0 01-.887.482l-6.247-4.616c-.394-.29-.931-.29-1.324 0L4.888 20.89a.557.557 0 01-.887-.482l.926-15.317A2.228 2.228 0 017.15 3h9.293z"
+                fill="#0074e9"
+                fill-rule="evenodd"
+              ></path>
+            </svg>
+          )}
           <p className="font-semibold peer-hover:text-primary">Bookmark</p>
         </div>
         <CopyLinkComponent link={link}>

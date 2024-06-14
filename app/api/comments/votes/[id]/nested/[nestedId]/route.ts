@@ -7,7 +7,6 @@ export const GET = auth(async function GET(
   req,
   { params }: { params: { id: string; nestedId: string } }
 ) {
-  console.log("checked from teh get route of votes comments");
   let response = await db
     .select()
     .from(NestedCommentsVotesTable)
@@ -40,3 +39,4 @@ export const GET = auth(async function GET(
     { status: 200 }
   );
 });
+  

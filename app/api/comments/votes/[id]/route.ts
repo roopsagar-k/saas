@@ -9,6 +9,7 @@ export const GET = auth(async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    console.log("catched");
     if (!req?.auth?.user?.id) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -50,7 +51,9 @@ export const GET = auth(async function GET(
       downVote: response.length > 0 ? response[0].downVote : false,
     };
 
-    return new Response(JSON.stringify({ commentVotes, count }), { status: 200 });
+    return new Response(JSON.stringify({ commentVotes, count }), {
+      status: 200,
+    });
   } catch (error) {
     console.error("Error fetching comment votes:", error);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
@@ -64,6 +67,7 @@ export const PUT = auth(async function PUT(
   { params }: { params: { id: string } }
 ) {
   const { nested, votes, nestedCommentId } = await req.json();
+  let count = 0;
   console.log("comment votes: ", votes, nested, nestedCommentId);
   if (!nested) {
     let response = await db
@@ -75,7 +79,7 @@ export const PUT = auth(async function PUT(
           eq(CommentsVotesTable.userId, req?.auth?.user?.id!)
         )
       );
-
+    console.log("from comment code : ", response);
     if (response.length > 0) {
       await db
         .update(CommentsVotesTable)
@@ -94,6 +98,16 @@ export const PUT = auth(async function PUT(
         commentId: params.id,
       });
     }
+    const commentAllVotes = await db
+      .select()
+      .from(CommentsVotesTable)
+      .where(
+        and(
+          eq(CommentsVotesTable.commentId, params.id),
+          eq(CommentsVotesTable.upVote, true)
+        )
+      );
+    count = commentAllVotes.length;
   } else {
     let response = await db
       .select()
@@ -101,7 +115,8 @@ export const PUT = auth(async function PUT(
       .where(
         and(
           eq(NestedCommentsVotesTable.commentId, params.id),
-          eq(NestedCommentsVotesTable.userId, req?.auth?.user?.id!)
+          eq(NestedCommentsVotesTable.userId, req?.auth?.user?.id!),
+          eq(NestedCommentsVotesTable.nestedCommentId, nestedCommentId)
         )
       );
     if (response.length > 0) {
@@ -124,11 +139,23 @@ export const PUT = auth(async function PUT(
         nestedCommentId: nestedCommentId,
       });
     }
+    const commentAllVotes = await db
+      .select()
+      .from(NestedCommentsVotesTable)
+      .where(
+        and(
+          eq(NestedCommentsVotesTable.commentId, params.id),
+          eq(NestedCommentsVotesTable.nestedCommentId, nestedCommentId),
+          eq(NestedCommentsVotesTable.upVote, true)
+        )
+      );
+    count = commentAllVotes.length;
   }
 
   return new Response(
     JSON.stringify({
       message: "Comment updated successfully",
+      count,
     }),
     {
       status: 201,

@@ -73,6 +73,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               email: profile?.email!,
               password: "google-auth",
               name: profile?.name!,
+              imgUrl: profile?.picture,
               userName:
                 (profile?.given_name! + profile?.family_name).toLowerCase() +
                 (totalUsers + 1).toString(),
@@ -102,6 +103,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               id: user.id,
               email: profile?.email!,
               password: "discord-auth",
+              imgUrl: profile?.image_url as string,
               name: profile?.global_name as string,
               userName: profile?.username + (totalUsers + 1).toString(),
             });

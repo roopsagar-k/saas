@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Pagination from "@/components/PaginationChange";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,8 +25,10 @@ const Question: React.FC<QuestionProps> = ({
   testInfo,
   setTestInfo,
 }) => {
-  const [index, setIndex] = React.useState<number>(0);
-
+  const [index, setIndex] = useState<number>(0);
+  const [userElapsedMinutes, setUserElapsedMinutes] = useState<number>(0);
+  const [userElapsedSeconds, setUserElapsedSeconds] = useState<number>(0);
+  const [stopTimer, setStopTimer] = useState<boolean>(false);
   useEffect(() => {
     const answerObj = testInfo?.answers?.find(
       (answer) => answer.questionIndex === index
@@ -38,6 +40,13 @@ const Question: React.FC<QuestionProps> = ({
       setSelectedOption(undefined);
     }
   }, [index]);
+
+  const handleSubmit = () => {
+    console.log("Submit");
+    console.log(testInfo);
+    setStopTimer(true);
+    console.log("mins:", userElapsedMinutes, "secs:", userElapsedSeconds);  
+  };
   return (
     <div className="p-3 sm:p-6 md:p-8 lg:p-10 xl:p-12 h-screen flex flex-col gap-4">
       <div className="flex justify-between items-center">
@@ -46,7 +55,10 @@ const Question: React.FC<QuestionProps> = ({
         </h1>
         <div className="flex gap-3 items-center">
           {index + 1 === test?.questions?.length ? (
-            <Button className="font-semibold h-12 text-white text-xl px-4 py-2">
+            <Button
+              onClick={handleSubmit}
+              className="font-semibold h-12 text-white text-xl px-4 py-2"
+            >
               Submit
             </Button>
           ) : (
@@ -55,12 +67,17 @@ const Question: React.FC<QuestionProps> = ({
               Save & exit
             </Button>
           )}
-          <Timer timeInMinutes={test?.duration!} />
+          <Timer
+            timeInMinutes={test?.duration!}
+            stopTimer={stopTimer}
+            setUserElapsedMinutes={setUserElapsedMinutes}
+            setUserElapsedSeconds={setUserElapsedSeconds}
+          />
         </div>
       </div>
       <Card className="my-4 mb-12 w-full flex-grow overflow-auto px-6 border border-2">
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="whitespace-pre">
             {index + 1 + ".  "} {test?.questions![index].question}
           </CardTitle>
           <div className="flex flex-wrap px-6 justify-center">
@@ -82,7 +99,7 @@ const Question: React.FC<QuestionProps> = ({
               <div key={OptionIndex} className="flex items-center space-x-2">
                 <label
                   className={classNames(
-                    `p-4 border-2 w-full border-l-4 border-l-primary dark:bg-black backdrop-blur-xl ${
+                    `p-4 border-2 w-full h-full border-l-4 border-l-primary dark:bg-black backdrop-blur-xl ${
                       selectedOption !== OptionIndex + 1 &&
                       "hover:bg-accent dark:hover:bg-slate-900 dark:hover:bg-opacity-50"
                     } cursor-pointer rounded-sm`,

@@ -15,17 +15,20 @@ import Comment from "@/components/Comment";
 import CommentSection from "@/components/CommentSection";
 import { Tag } from "lucide-react";
 import type { UserVoteType } from "@/app/types/types";
+import { formatDistanceToNow, parseISO } from "date-fns";
 
 interface PostComponentProps {
   post: PostType;
   descriptionLength: "half" | "full";
   id: string;
+  setBookMarkUpdate: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Post: React.FC<PostComponentProps> = ({
   post,
   descriptionLength,
   id,
+  setBookMarkUpdate,
 }) => {
   const router = useRouter();
   const [comments, setComments] = useState<CommentType[]>([]);
@@ -34,7 +37,8 @@ const Post: React.FC<PostComponentProps> = ({
   const [totalUpVotes, setTotalUpVotes] = useState<number>(0);
   const [vote, setVote] = useState<UserVoteType>();
   const [commentMessage, setCommentMessage] = useState<string>("");
-  const [triggerFetchComments, setTriggerFetchComments] = useState<boolean>(false);
+  const [triggerFetchComments, setTriggerFetchComments] =
+    useState<boolean>(false);
   const maxLengthOfDescription =
     descriptionLength === "half" ? 500 : post?.tests.description.length;
 
@@ -84,20 +88,25 @@ const Post: React.FC<PostComponentProps> = ({
     router.push(`tests/${id}`);
   };
 
+  const createdAt = post?.tests?.createdAt;
+  console.log(createdAt, "time date");
+  const formattedDate = createdAt
+    ? formatDistanceToNow(new Date(parseInt(createdAt)), { addSuffix: true })
+    : "Unknown time";
+
   return (
     <div>
       <Card key={id} className="min-w-[55rem] py-6 px-8">
         <div className="flex items-center gap-4">
           <Avatar className="cursor-pointer text-center size-16 flex items-center">
-            <AvatarImage
-              className="rounded-lg"
-              src="https://github.com/shadcn.png"
-            />
+            <AvatarImage className="rounded-lg" src={post?.users?.imgUrl} />
             <AvatarFallback>{post?.users?.name?.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <p className="font-semibold">{post?.users?.name}</p>
-            <p className="text-gray-300">@{post?.users?.userName}</p>
+            <p className="text-gray-300">
+              @{post?.users?.userName} | {formattedDate}
+            </p>
           </div>
         </div>
         <h3 className="mt-8 text-2xl font-semibold tracking-tight">
@@ -114,9 +123,14 @@ const Post: React.FC<PostComponentProps> = ({
           )}
         </p>
         <div className="mt-4 font-semibold">
-          <p className="flex gap-2 items-center">
-            <Tag className="transform rotate-90" stroke="#A8B3CF" />
-            Tags: <span className="text-primary">{post?.tests?.tags}</span>
+          <p className="items-center">
+            <div>
+              <div className="flex gap-2">
+                <Tag className="transform rotate-90" stroke="#A8B3CF" />
+                <p>Tags:</p>{" "}
+              </div>
+              <span className="text-primary mt-2">{post?.tests?.tags}</span>
+            </div>
           </p>
           <div className="mt-4 flex gap-4 text-[#A8B3CF]">
             <p>
@@ -131,7 +145,12 @@ const Post: React.FC<PostComponentProps> = ({
           </Button>
         </div>
         <div>
-          <InteractionPanel post={post} vote={vote!} setVote={setVote} />
+          <InteractionPanel
+            setBookMarkUpdate={setBookMarkUpdate}
+            post={post}
+            vote={vote!}
+            setVote={setVote}
+          />
         </div>
         {descriptionLength === "full" && (
           <>

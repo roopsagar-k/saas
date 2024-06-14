@@ -90,16 +90,14 @@ const Questions = ({
       }
       try {
         const response = await axios.post("/api/upload", formData);
-        const uploadedFiles = response.data.uploadedFiles;
-
+        const { uploadedFiles } = response.data;
+        console.log(uploadedFiles, "uploaded files");
         setQuestions!((prev) => {
           const newArray = [...prev];
           uploadedFiles.forEach((fileName: string) => {
-            if (!newArray[index].images?.includes(fileName)) {
-              newArray[index].images?.push(fileName);
-              console.log("images pushed to array");
-              console.log(newArray[index].images);
-            }
+            newArray[index].images
+              ? !newArray[index].images?.includes(fileName) && newArray[index].images?.push(fileName)
+              : (newArray[index]["images"] = [fileName]);
           });
           return newArray;
         });
@@ -117,6 +115,7 @@ const Questions = ({
           </CardHeader>
           <CardContent>
             <Textarea
+              className="h-max"
               placeholder="Question"
               value={questions[index].question}
               readOnly={readOnly}
@@ -136,7 +135,7 @@ const Questions = ({
                       <img
                         key={imageIndex}
                         src={"/images/" + image}
-                        alt="quesion image"
+                        alt={image}
                         className="object-cover w-full h-auto"
                       />
                       <div className={`${readOnly && "hidden size-0"}`}>
@@ -152,7 +151,7 @@ const Questions = ({
                           stroke-linejoin="round"
                           onClick={() => deleteImage(index, imageIndex)}
                           className={classNames(
-                            "lucide lucide-trash-2 absolute bottom-0 right-0 w-8 h-8 cursor-pointer rounded-full p-1 abs backdrop-blur-lg bg-transparent"
+                            "lucide lucide-trash-2 absolute bottom-0 right-0 w-8 h-8 cursor-pointer rounded-full p-1 abs backdrop-blur-lg bg-transparent text-[#A8B3CF]"
                           )}
                         >
                           <path d="M3 6h18" />
