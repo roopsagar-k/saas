@@ -48,7 +48,11 @@ export type TestInfo = {
   testId?: string;
   userId?: string;
   answers?: { questionIndex: number; answer: number }[];
-  duration?: number;
+  minutes?: number;
+  seconds?: number;
+  currentScore?: number;
+  highestScore?: number;
+  totalScore?: number;
 };
 
 export type TestInfoContextType = {
@@ -85,11 +89,11 @@ export type ChildrenComment = {
     recipient: CredentialsType;
   }[];
 };
+
 export type Comment = {
   comments: ParentComment & ChildrenComment & CredentialsType;
   users: CredentialsType;
 };
-
 
 export type Vote = {
   id: string;
@@ -112,17 +116,21 @@ export type NestedComment = {
   userId: string;
   recipientId?: string;
   postId: string;
-}
+};
 
 export type BookmarkType = {
   id: string;
   postId: string;
   userId: string;
-}
+};
 
 export type BookMarkJoinType = {
   book_mark: BookmarkType;
   tests: Test;
   users: User;
-}
+};
 
+export type Answer = {
+  answer: number,
+  questionIndex: number,
+}

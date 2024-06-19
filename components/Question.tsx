@@ -7,6 +7,10 @@ import { TestInfo } from "@/app/types/types";
 import classNames from "classnames";
 import Timer from "./Timer";
 import { Button } from "./ui/button";
+import { insertTestTakenInfo } from "@/lib/actions";
+import { useUserContext } from "@/context/UserContext";
+import axios from "@/axiosConfig";
+import { useRouter } from "next/navigation";
 
 interface QuestionProps {
   test: Test;
@@ -29,11 +33,30 @@ const Question: React.FC<QuestionProps> = ({
   const [userElapsedMinutes, setUserElapsedMinutes] = useState<number>(0);
   const [userElapsedSeconds, setUserElapsedSeconds] = useState<number>(0);
   const [stopTimer, setStopTimer] = useState<boolean>(false);
+  const router = useRouter();
+  const { user, setUser } = useUserContext();
+
+    useEffect(() => {
+      async function checkAuthenticated() {
+        if (!user) {
+          try {
+            const response = await axios.get("/api/admin");
+            if (response.status === 200) {
+              console.log("User data fetched:", response.data);
+              setUser(response.data);
+            }
+          } catch (error) {
+            console.error("Error fetching user data:", error);
+          }
+        }
+      }
+      checkAuthenticated();
+    }, [user]);
+
   useEffect(() => {
     const answerObj = testInfo?.answers?.find(
       (answer) => answer.questionIndex === index
     );
-    console.log(answerObj, " from useEffect");
     if (answerObj) {
       setSelectedOption(answerObj.answer);
     } else {
@@ -41,11 +64,13 @@ const Question: React.FC<QuestionProps> = ({
     }
   }, [index]);
 
-  const handleSubmit = () => {
-    console.log("Submit");
-    console.log(testInfo);
+  const handleSubmit = async () => {
     setStopTimer(true);
-    console.log("mins:", userElapsedMinutes, "secs:", userElapsedSeconds);  
+    testInfo.minutes = userElapsedMinutes;
+    testInfo.seconds = userElapsedSeconds;
+    testInfo.userId = user?.id;
+    await insertTestTakenInfo(testInfo, user?.id!);
+    router.push(`/dashboard`);
   };
   return (
     <div className="p-3 sm:p-6 md:p-8 lg:p-10 xl:p-12 h-screen flex flex-col gap-4">
@@ -62,10 +87,11 @@ const Question: React.FC<QuestionProps> = ({
               Submit
             </Button>
           ) : (
-            <Button className="font-semibold h-12 text-white text-xl px-4 py-2">
-              {" "}
-              Save & exit
-            </Button>
+            // <Button className="font-semibold h-12 text-white text-xl px-4 py-2">
+            //   {" "}
+            //   Save & exit
+            // </Button>
+            <></>
           )}
           <Timer
             timeInMinutes={test?.duration!}
@@ -77,7 +103,7 @@ const Question: React.FC<QuestionProps> = ({
       </div>
       <Card className="my-4 mb-12 w-full flex-grow overflow-auto px-6 border border-2">
         <CardHeader>
-          <CardTitle className="whitespace-pre">
+          <CardTitle className="whitespace-pre-wrap break-words font-medium">
             {index + 1 + ".  "} {test?.questions![index].question}
           </CardTitle>
           <div className="flex flex-wrap px-6 justify-center">
@@ -113,26 +139,40 @@ const Question: React.FC<QuestionProps> = ({
                     checked={selectedOption === OptionIndex + 1}
                     className="hidden"
                     onChange={(e) => {
-                      console.log(e.target.value);
-                      setSelectedOption(parseInt(e.target.value));
-                      setTestInfo((prev: TestInfo | undefined) => {
-                        const answers =
-                          prev?.answers?.filter(
-                            (answer) => answer.questionIndex !== index
-                          ) || [];
-                        return {
-                          ...prev,
-                          answers: [
-                            ...answers!,
-                            {
-                              questionIndex: index,
-                              answer: parseInt(e.target.value),
-                            },
-                          ],
-                        };
-                      });
+                      const selectedValue = parseInt(e.target.value);
+                      if (selectedOption === selectedValue) {
+                        setSelectedOption(undefined);
+                        setTestInfo((prev: TestInfo | undefined) => {
+                          const answers =
+                            prev?.answers?.filter(
+                              (answer) => answer.questionIndex !== index
+                            ) || [];
+                          return {
+                            ...prev,
+                            answers,
+                          };
+                        });
+                      } else {
+                        setSelectedOption(selectedValue);
+                        setTestInfo((prev: TestInfo | undefined) => {
+                          const answers =
+                            prev?.answers?.filter(
+                              (answer) => answer.questionIndex !== index
+                            ) || [];
+                          return {
+                            ...prev,
+                            answers: [
+                              ...answers!,
+                              {
+                                questionIndex: index,
+                                answer: selectedValue,
+                              },
+                            ],
+                          };
+                        });
+                      }
                     }}
-                    type="radio"
+                    type="checkbox"
                     id={`r${OptionIndex}`}
                     name="question"
                   />

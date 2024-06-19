@@ -29,7 +29,7 @@ const InteractionPanel: React.FC<InteractionPanelProps> = ({
   const [isBookMark, setIsBookMark] = useState<boolean>(false);
   const pathName = usePathname();
   let link = "http://localhost:3000/";
-  link += "home/post/" + post?.tests.id;
+  link += "/home/post/" + post?.tests.id;
 
   useEffect(() => {
     async function fetchBookMarks() {

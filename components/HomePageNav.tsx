@@ -1,27 +1,42 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "./ui/input";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "./ui/button";
 import { useUserContext } from "@/context/UserContext";
+import { useRouter } from "next/navigation";
 
 const HomePageNav = () => {
   const { theme, setTheme } = useTheme();
   const { user } = useUserContext();
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const router = useRouter();
+
   function toggleTheme(): void {
     theme === "light" ? setTheme("dark") : setTheme("light");
   }
+
+  const onSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const encodedQuery = encodeURI(searchQuery);
+    router.push(`/search?q=${encodedQuery}`);
+  }
+
   return (
     <div className="w-full h-20 flex gap-2 items-center px-4 justify-between">
       <div className="w-[90%] flex justify-center">
         <div className="relative w-[55%]">
-          <Input
-            type="search"
-            placeholder="search..."
-            className="pl-10 border bg-secondary placeholder:px-4"
-          />
+          <form onSubmit={onSearch}>
+            <Input
+              type="search"
+              placeholder="search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 border bg-secondary placeholder:px-4"
+            />
+          </form>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -53,10 +68,7 @@ const HomePageNav = () => {
           </svg>
         </div>
         <Avatar className="cursor-pointer size-12 rounded-sm">
-          <AvatarImage
-            className="rounded-lg"
-            src={user?.image}
-          />
+          <AvatarImage className="rounded-lg" src={user?.image} />
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
 

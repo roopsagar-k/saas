@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import type { QuestionType } from "@/app/types/types";
+import type { QuestionType, Answer } from "@/app/types/types";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import classNames from "classnames";
@@ -18,12 +18,16 @@ const Questions = ({
   deletedImages,
   setDeletedImages,
   readOnly = false,
+  answers,
+  showAnswers = false,
 }: {
   questions: QuestionType[];
   setQuestions?: React.Dispatch<React.SetStateAction<QuestionType[]>>;
   deletedImages?: string[];
   setDeletedImages?: React.Dispatch<React.SetStateAction<string[]>>;
   readOnly?: boolean;
+  answers?: Answer[];
+  showAnswers?: boolean;
 }) => {
   const deleteImage = async (index: number, imageIndex: number) => {
     setDeletedImages!((prev) => {
@@ -96,7 +100,8 @@ const Questions = ({
           const newArray = [...prev];
           uploadedFiles.forEach((fileName: string) => {
             newArray[index].images
-              ? !newArray[index].images?.includes(fileName) && newArray[index].images?.push(fileName)
+              ? !newArray[index].images?.includes(fileName) &&
+                newArray[index].images?.push(fileName)
               : (newArray[index]["images"] = [fileName]);
           });
           return newArray;
@@ -111,7 +116,10 @@ const Questions = ({
       {questions?.map((question, index) => (
         <Card key={index} className="py-4 mt-4">
           <CardHeader>
-            <CardTitle>Question {index + 1}.</CardTitle>
+            <CardTitle>
+              Question {index + 1}.{" "}
+                {!answers?.find((ans) => ans.questionIndex === index) && showAnswers && "(NA)"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <Textarea
@@ -173,6 +181,21 @@ const Questions = ({
                   value={questions[index].options[optionIndex].option}
                   key={optionIndex}
                   readOnly={readOnly}
+                  className={classNames(
+                    answers?.find((ans) => ans.questionIndex === index)
+                      ?.answer ===
+                      optionIndex + 1 && "bg-green-700",
+                    parseInt(question.answer) !==
+                      answers?.find((ans) => ans.questionIndex === index)
+                        ?.answer &&
+                      answers?.find((ans) => ans.questionIndex === index)
+                        ?.answer ===
+                        optionIndex + 1 &&
+                      "bg-destructive",
+                    parseInt(question.answer) === optionIndex + 1 &&
+                      showAnswers &&
+                      "bg-green-700 bg-opacity-85"
+                  )}
                   onChange={(e) =>
                     setQuestions!((prev) => {
                       const newArray = [...prev];

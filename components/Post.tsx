@@ -15,13 +15,14 @@ import Comment from "@/components/Comment";
 import CommentSection from "@/components/CommentSection";
 import { Tag } from "lucide-react";
 import type { UserVoteType } from "@/app/types/types";
-import { formatDistanceToNow, parseISO } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
+import { useMediaQuery } from "react-responsive";
 
 interface PostComponentProps {
   post: PostType;
   descriptionLength: "half" | "full";
   id: string;
-  setBookMarkUpdate: React.Dispatch<React.SetStateAction<boolean>>;
+  setBookMarkUpdate?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Post: React.FC<PostComponentProps> = ({
@@ -41,6 +42,7 @@ const Post: React.FC<PostComponentProps> = ({
     useState<boolean>(false);
   const maxLengthOfDescription =
     descriptionLength === "half" ? 500 : post?.tests.description.length;
+  const isTabView = useMediaQuery({ query: "(min-width: 768px) && (max-width: 1024px)" })
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -85,7 +87,7 @@ const Post: React.FC<PostComponentProps> = ({
   };
 
   const handleTakeTest = () => {
-    router.push(`tests/${id}`);
+    router.push(`/tests/${id}`);
   };
 
   const createdAt = post?.tests?.createdAt;
@@ -96,7 +98,7 @@ const Post: React.FC<PostComponentProps> = ({
 
   return (
     <div>
-      <Card key={id} className="min-w-[55rem] py-6 px-8">
+      <Card key={id} className="min-w-[35rem] lg:min-w-[55rem] py-6 px-8">
         <div className="flex items-center gap-4">
           <Avatar className="cursor-pointer text-center size-16 flex items-center">
             <AvatarImage className="rounded-lg" src={post?.users?.imgUrl} />
@@ -114,8 +116,16 @@ const Post: React.FC<PostComponentProps> = ({
         </h3>
         <p className="mt-4 leading-7">
           {post?.tests?.description.length > maxLengthOfDescription
-            ? `${post?.tests?.description.slice(0, maxLengthOfDescription)}...`
-            : post?.tests?.description}
+            ? `${
+                isTabView
+                  ? post?.tests?.description.slice(0, 250)
+                  : post?.tests?.description.slice(0, maxLengthOfDescription)
+              }...`
+            : `${
+                isTabView
+                  ? post?.tests?.description.slice(0, 250) + "..."
+                  : post?.tests?.description
+              }`}
           {post?.tests?.description.length > maxLengthOfDescription && (
             <Button onClick={handleReadMore} className="-ml-4" variant="link">
               read more
@@ -129,7 +139,11 @@ const Post: React.FC<PostComponentProps> = ({
                 <Tag className="transform rotate-90" stroke="#A8B3CF" />
                 <p>Tags:</p>{" "}
               </div>
-              <span className="text-primary mt-2">{post?.tests?.tags}</span>
+              <span className="text-primary font-medium mt-2">
+                {isTabView
+                  ? post?.tests?.tags.slice(0, 100) + "..."
+                  : post?.tests?.tags}
+              </span>
             </div>
           </p>
           <div className="mt-4 flex gap-4 text-[#A8B3CF]">
@@ -146,7 +160,7 @@ const Post: React.FC<PostComponentProps> = ({
         </div>
         <div>
           <InteractionPanel
-            setBookMarkUpdate={setBookMarkUpdate}
+            setBookMarkUpdate={setBookMarkUpdate!}
             post={post}
             vote={vote!}
             setVote={setVote}

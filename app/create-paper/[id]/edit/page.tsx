@@ -11,25 +11,28 @@ import Questions from "@/components/Questions";
 import type { QuestionType } from "@/app/types/types";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
 
 const EditPage = () => {
   const [test, setTest] = useState<Test | null>(null);
+  const { toast } = useToast();
   const { id } = useParams();
   const [questions, setQuestions] = useState<QuestionType[]>([]);
   const router = useRouter();
+
   useEffect(() => {
     async function fetchData() {
       const response = await axios.get<Test>(`/api/tests/${id}`);
       if (response.status === 200) {
         setTest(response.data);
-        console.log("Test: ", response.data);
-        setQuestions(response.data.questions!);
+        setQuestions(response.data.questions || []);
       }
     }
     fetchData();
-  }, []);
+  }, [id]);
 
   const [deletedImages, setDeletedImages] = useState<string[]>([]);
+
   const handleSaveChanges = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -38,18 +41,20 @@ const EditPage = () => {
       ...test!,
       questions: questions,
     };
+
     await axios.put("/api/upload", { deletedImages });
-    const response = await axios.put(`/api/tests/${id}`, {
-      data,
-    });
+
+    const response = await axios.put(`/api/tests/${id}`, { data });
+
     if (response.status === 200) {
-      console.log("Test updated successfully");
+      toast({ description: "Changes updated successfully! :)" });
       router.back();
     }
   };
+
   return (
-    <div className="px-[20%] py-8">
-      <div>
+    <div className="container mx-auto px-3 sm:px-6 md:px-[10%] lg:px-[20%] xl:px-12 py-8">
+      <div className="max-w-screen-lg mx-auto">
         <div className="my-4">
           <Label className="font-semibold text-lg" htmlFor="title">
             Title
@@ -59,13 +64,10 @@ const EditPage = () => {
             name="title"
             placeholder="Title"
             type="text"
-            value={test?.title}
-            onChange={(e) => {
-              setTest((prev) => ({
-                ...prev!,
-                title: e.target.value,
-              }));
-            }}
+            value={test?.title || ""}
+            onChange={(e) =>
+              setTest((prev) => ({ ...prev!, title: e.target.value }))
+            }
             className="mt-2"
           />
         </div>
@@ -74,72 +76,43 @@ const EditPage = () => {
             Description
           </Label>
           <Textarea
-            typeof="text"
             id="description"
             name="description"
-            value={test?.description}
-            onChange={(e) => {
-              setTest((prev) => ({
-                ...prev!,
-                description: e.target.value,
-              }));
-            }}
+            value={test?.description || ""}
+            onChange={(e) =>
+              setTest((prev) => ({ ...prev!, description: e.target.value }))
+            }
             className="mt-2"
             placeholder="Share your thoughts about this post..."
           />
         </div>
-        <div className="flex flex-col mt-4 gap-2">
-          <Label className="font-semibold text-lg" htmlFor="tags">
-            Tags
-          </Label>
-          <Input
-            id="tags"
-            name="tags"
-            onChange={(e) => {
-              setTest((prev) => ({
-                ...prev!,
-                tags: e.target.value,
-              }));
-            }}
-            type="text"
-            value={test?.tags}
-            placeholder="Add relevant tags (comma-separated)"
-          />
-        </div>
-        <div className="grid grid-cols-2 mt-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
           <div>
-            <Label className="font-semibold text-lg" htmlFor="title">
-              Duration
+            <Label className="font-semibold text-lg" htmlFor="tags">
+              Tags
             </Label>
             <Input
-              id="duration"
-              name="duration"
-              type="number"
-              className="mt-2"
-              value={test?.duration}
-              onChange={(e) => {
-                setTest((prev) => ({
-                  ...prev!,
-                  duration: parseInt(e.target.value),
-                }));
-              }}
-              placeholder="Enter the test duration in minutes"
+              id="tags"
+              name="tags"
+              onChange={(e) =>
+                setTest((prev) => ({ ...prev!, tags: e.target.value }))
+              }
+              type="text"
+              value={test?.tags || ""}
+              placeholder="Add relevant tags (comma-separated)"
             />
           </div>
-          <div className="flex items-center gap-4 mt-6">
+          <div className="flex items-center gap-4 mt-6 sm:mt-0">
             <Label className="font-semibold text-lg" htmlFor="private-post">
-              Private Post :{" "}
+              Private Post:
             </Label>
             <Switch
               id="private-post"
               name="privatePost"
-              checked={test?.privatePost}
-              onCheckedChange={(val) => {
-                setTest((prev) => ({
-                  ...prev!,
-                  privatePost: val,
-                }));
-              }}
+              checked={test?.privatePost || false}
+              onCheckedChange={(val) =>
+                setTest((prev) => ({ ...prev!, privatePost: val }))
+              }
             />
           </div>
         </div>
@@ -152,8 +125,8 @@ const EditPage = () => {
           setDeletedImages={setDeletedImages}
         />
         <Button
-          variant={"secondary"}
-          className="mt-4 w-full"
+          variant="secondary"
+          className="mt-4 w-full max-w-sm mx-auto sm:max-w-full"
           onClick={(e) => handleSaveChanges(e)}
         >
           Save Changes

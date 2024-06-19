@@ -6,12 +6,28 @@ import axios from "axios";
 import { useTestInfoContext } from "@/context/TestInfoContext";
 import type { TestInfo } from "@/app/types/types";
 import Question from "@/components/Question";
+import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const TestPage = () => {
   const [test, setTest] = useState<Test | null>(null);
   const [selectedOption, setSelectedOption] = useState<number>();
   const { testInfo, setTestInfo } = useTestInfoContext();
   const { id } = useParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    function handleOnBeforeUnLoad(event: BeforeUnloadEvent) {
+      event.preventDefault();
+      return (event.returnValue = "");
+    }
+
+    window.addEventListener("beforeunload", handleOnBeforeUnLoad, {
+      capture: true,
+    });
+  }, []);
+
   useEffect(() => {
     async function fetchData() {
       const response = await axios.get<Test>(`/api/tests/${id}`);

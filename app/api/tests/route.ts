@@ -18,7 +18,6 @@ export const GET = auth(async function GET(req) {
 export const POST = auth(async function POST(req) {
   let id: string = "";
   if (req.auth) {
-    console.log("req.auth: ", req.auth);
     id = req.auth?.user?.id!;
   }
   const data: Test = await req.json();
@@ -36,7 +35,9 @@ export const POST = auth(async function POST(req) {
       createdAt: Date.now().toString(),
     })
     .returning({ testId: TestTable.id });
-  console.log("response: testid ", response);
+    console.log("response: testid ", response);
+    
+ 
   return new Response(
     JSON.stringify({
       message: "test created successfully",

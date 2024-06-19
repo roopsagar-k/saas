@@ -1,8 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
-  bigint,
   boolean,
-  date,
   integer,
   jsonb,
   pgTable,
@@ -46,13 +44,16 @@ export const TestsTakenTable = pgTable("tests_taken", {
   answers: jsonb("answers").default([]).array(),
   minutes: integer("minutes").default(0),
   seconds: integer("seconds").default(0),
+  currentScore: integer("current_score").default(0).notNull(),
+  highestScore: integer("highest_score").default(0).notNull(),
+  totalScore: integer("total_score").default(0).notNull(),
 });
 
 export const BookMarkTable = pgTable("book_mark", {
   id: uuid("id").primaryKey().defaultRandom(),
   postId: uuid("post_id")
     .notNull()
-    .references(() => TestTable.id, { onDelete: "cascade" }),
+    .references(() => TestTable.id, { onDelete: "cascade" }).unique(),
   userId: uuid("user_id")
     .notNull()
     .references(() => UserTable.id, { onDelete: "cascade" }),

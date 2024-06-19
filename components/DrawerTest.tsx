@@ -24,17 +24,27 @@ import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
 import { Test } from "@/app/types/types";
 import axios from "axios";
+import pdfToText from "react-pdftotext";
+import { Plus } from "lucide-react";
 
 const DrawerTest = () => {
   const router = useRouter();
   const [ownTest, setOwnTest] = useState(false);
   const [privatePost, setPrivatePost] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [pdfText, setPdfText] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       console.log("File changed: ", e.target.files[0]);
       setFile(e.target.files[0]);
+      const pdfFile = e.target.files[0];
+      pdfToText(pdfFile)
+        .then((text) => setPdfText(text))
+        .catch((error) =>
+          console.error("Failed to extract text from  pdf: ", error)
+        );
     }
   };
 
@@ -42,12 +52,6 @@ const DrawerTest = () => {
     e: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     e.preventDefault();
-    const formData = new FormData();
-    // if (file) {
-    //   formData.append("file", file);
-    //   const response = await axios.post("/api/tests", formData);
-    //   console.log("Response: ", response.data);
-    // }
     const data: Test = {
       title: e.currentTarget.title.value,
       description: e.currentTarget.description.value,
@@ -58,11 +62,39 @@ const DrawerTest = () => {
     };
     console.log("data: ", data);
     let testId = "";
-    try {
-      const res = await axios.post("/api/tests", data);
-      testId = res.data.testId;
-    } catch (error) {
-      console.error("Error creating test: ", error);
+    if (file) {
+      const formData = new FormData();
+      const blob = new Blob([pdfText], { type: "text/plain" });
+      const file = new File([blob], "converted-text.txt", {
+        type: "text/plain",
+      });
+      console.log("File: ", file);
+      formData.append("file", file);
+      formData.append("data", JSON.stringify(data));
+      try {
+        const response = await axios.post("api/tests/file", formData);
+        testId = response.data.testId;
+        console.log("Response: ", response.data);
+        console.log(
+          "Response: specific ",
+          response.data.result.response?.candidates[0].content.parts[0].text
+        );
+        console.log("jsString", response.data.jsonString);
+        if (response.status === 201) {
+          router.push(`/create-paper/${testId}`);
+        } else {
+          setErrorMessage("Failed to parse your pdf file.")
+        }
+      } catch (error) {
+        console.error("Error creating test: ", error);
+      }
+    } else {
+      try {
+        const res = await axios.post("api/tests", data);
+        testId = res.data.testId;
+      } catch (error) {
+        console.error("Error creating test: ", error);
+      }
     }
     if (data.ownTest) {
       router.push(`/create-paper/${testId}`);
@@ -74,15 +106,7 @@ const DrawerTest = () => {
     <Drawer>
       <DrawerTrigger>
         <div className="bg-primary p-4 rounded-full">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="w-8 h-8"
-          >
-            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-            <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-          </svg>
+          <Plus className="h-8 w-8" />
         </div>
       </DrawerTrigger>
       <DrawerContent className="sm:px-[10%] lg:px-[20%]">
@@ -90,10 +114,46 @@ const DrawerTest = () => {
           <DrawerHeader>
             <DrawerTitle>Test creation</DrawerTitle>
             <DrawerDescription>
+              <p className="text-destructive">{errorMessage && errorMessage}</p>
               Create test by uploading pdf/file or Add the questions and options
               manually
             </DrawerDescription>
-
+            <div className="grid grid-cols-2 gap-4 mt-2">
+              <Card className="flex flex-col gap-3 items-center text-justify sm:flex-row sm:items-start sm:text-left p-3">
+                <div>
+                  <CardTitle className="text-md">
+                    Compose Your Own Test
+                  </CardTitle>
+                  <CardDescription>
+                    Manually add questions, options, answers, and attach images
+                    to create your own question paper.
+                  </CardDescription>
+                </div>
+                <Switch
+                  id="own-test"
+                  name="ownTest"
+                  checked={ownTest}
+                  value={ownTest ? "on" : "off"}
+                  onCheckedChange={() => setOwnTest(!ownTest)}
+                />
+              </Card>
+              <Card className="flex flex-col gap-3 items-center text-justify sm:flex-row sm:items-start sm:text-left p-3">
+                <div>
+                  <CardTitle className="text-md">Private post</CardTitle>
+                  <CardDescription>
+                    By checking this, your post or test will be visible only to
+                    those who access them via links, not even to your followers.
+                  </CardDescription>
+                </div>
+                <Switch
+                  id="private-post"
+                  name="privatePost"
+                  value={privatePost ? "on" : "off"}
+                  checked={privatePost}
+                  onCheckedChange={() => setPrivatePost(!privatePost)}
+                />
+              </Card>
+            </div>
             <Card className="flex items-center justify-center relative">
               <CardContent className="flex flex-col items-center justify-center mt-4">
                 <svg
@@ -133,6 +193,7 @@ const DrawerTest = () => {
                   name="title"
                   placeholder="Title"
                   type="text"
+                  required
                 />
               </div>
               <div className="flex flex-col w-full gap-2">
@@ -142,6 +203,7 @@ const DrawerTest = () => {
                   name="duration"
                   type="number"
                   placeholder="Enter the test duration in minutes"
+                  required
                 />
               </div>
             </div>
@@ -152,6 +214,7 @@ const DrawerTest = () => {
                 id="description"
                 name="description"
                 placeholder="Share your thoughts about this post..."
+                required
               />
             </div>
             <div className="flex flex-col mt-4 gap-2">
@@ -161,43 +224,8 @@ const DrawerTest = () => {
                 name="tags"
                 type="text"
                 placeholder="Add relevant tags (comma-separated)"
+                required
               />
-            </div>
-            <div className="grid grid-cols-2 gap-4 mt-2">
-              <Card className="flex flex-col gap-3 items-center text-justify sm:flex-row sm:items-start sm:text-left p-3">
-                <div>
-                  <CardTitle className="text-md">
-                    Compose Your Own Test
-                  </CardTitle>
-                  <CardDescription>
-                    Manually add questions, options, answers, and attach images
-                    to create your own question paper.
-                  </CardDescription>
-                </div>
-                <Switch
-                  id="own-test"
-                  name="ownTest"
-                  checked={ownTest}
-                  value={ownTest ? "on" : "off"}
-                  onCheckedChange={() => setOwnTest(!ownTest)}
-                />
-              </Card>
-              <Card className="flex flex-col gap-3 items-center text-justify sm:flex-row sm:items-start sm:text-left p-3">
-                <div>
-                  <CardTitle className="text-md">Private post</CardTitle>
-                  <CardDescription>
-                    By checking this, your post or test will be visible only to
-                    those who access them via links, not even to your followers.
-                  </CardDescription>
-                </div>
-                <Switch
-                  id="private-post"
-                  name="privatePost"
-                  value={privatePost ? "on" : "off"}
-                  checked={privatePost}
-                  onCheckedChange={() => setPrivatePost(!privatePost)}
-                />
-              </Card>
             </div>
           </DrawerHeader>
           <DrawerFooter>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { Comment } from "@/app/types/types";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
@@ -50,7 +50,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     if (hash) {
       const commentId = hash.substring(1);
       const comment = document.getElementById(commentId);
-      setOnScrollCommentId(commentId)
+      setOnScrollCommentId(commentId);
       comment?.scrollIntoView({ behavior: "instant" });
       updateColor();
     }
@@ -64,16 +64,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   }
 
   return (
-    <Card className="relative flex flex-col gap-8">
+    <Card className="relative flex flex-col gap-8 w-full md:min-w-[30rem] lg:min-w-[40rem] xl:min-w-[55rem]">
       {comments.map((comment) => (
         <div key={comment.comments.id}>
           <Card
             className={`p-4 ${
-              (scrollCommentId == "comment-" + comment.comments.id && onViewColor) && "bg-accent"
+              scrollCommentId === "comment-" + comment.comments.id &&
+              onViewColor
+                ? "bg-accent"
+                : ""
             }`}
             id={`comment-${comment.comments.id}`}
           >
-            <div className="flex items-center overflow-hidden gap-4">
+            <div className="flex items-center gap-4">
               <Avatar className="cursor-pointer size-12 flex items-center text-center">
                 <AvatarImage
                   className="rounded-lg"
@@ -114,11 +117,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({
                 <Card
                   id={`comment-${nestedComment.id}`}
                   className={`p-4 flex-1 mt-4 ${
-                    (scrollCommentId == "comment-" + nestedComment.id && onViewColor) &&
-                    "bg-accent"
+                    scrollCommentId === "comment-" + nestedComment.id &&
+                    onViewColor
+                      ? "bg-accent"
+                      : ""
                   }`}
                 >
-                  <div className="flex items-center overflow-hidden gap-4">
+                  <div className="flex items-center gap-4">
                     <Avatar className="cursor-pointer size-12 flex items-center text-center">
                       <AvatarImage
                         className="rounded-lg"

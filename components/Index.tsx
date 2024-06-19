@@ -17,8 +17,8 @@ const Index = ({ children }: { children: React.ReactNode }) => {
         <div className="absolute bottom-20 right-20">
           <ToolTip content="Start creating test" classNames="mb-2">
             <DrawerTest />
-          </ToolTip>
-        </div>
+          </ToolTip>  
+        </div>  
       </div>
     </div>
   );
