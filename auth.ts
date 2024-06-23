@@ -6,8 +6,23 @@ import { db } from "./lib/drizzle/db";
 import { UserTable } from "./lib/drizzle/schema";
 import { count, eq } from "drizzle-orm";
 import bcypt from "bcryptjs";
-import { User } from "lucide-react";
-
+const specialCharacters = [
+  "!",
+  "#",
+  "$",
+  "%",
+  "&",
+  "*",
+  "+",
+  "-",
+  "=",
+  "?",
+  "^",
+  "_",
+  "~",
+  ".",
+  "@",
+];
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Google({
@@ -26,16 +41,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: {},
       },
       authorize: async (credentials) => {
-        console.log("Received credentials:", credentials);
         const user = await db
           .select()
           .from(UserTable)
           .where(eq(UserTable.email, credentials.email as string));
 
-        console.log("User found in database:", user);
-
         if (user.length === 0) {
-          console.log("User not found");
           throw new AuthError("User not found.");
         }
 
@@ -43,8 +54,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           credentials.password as string,
           user[0].password
         );
-
-        console.log("Password comparison result:", isValidPassword);
 
         if (!isValidPassword) {
           throw new AuthError("Invalid password, try again!");
@@ -56,11 +65,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async signIn({ account, profile, user }) {
-      console.log("user: ", user);
-      console.log("account: ", account);
-      console.log("proflie: ", profile);
       const allUsers = await db.select().from(UserTable);
+      console.log(account, profile, user, allUsers);
       const totalUsers = allUsers.length;
+      if(account?.provider === "credentials"){
+        return true;
+      }
       if (account?.provider === "google") {
         if (profile?.email_verified) {
           const result = await db
@@ -76,6 +86,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               imgUrl: profile?.picture,
               userName:
                 (profile?.given_name! + profile?.family_name).toLowerCase() +
+                specialCharacters[
+                  Math.floor(Math.random() * specialCharacters.length)
+                ] +
                 (totalUsers + 1).toString(),
             });
           } else {
@@ -97,7 +110,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             .select()
             .from(UserTable)
             .where(eq(UserTable.email, profile?.email!));
-          console.log("result: ", result);
+
           if (result.length === 0) {
             await db.insert(UserTable).values({
               id: user.id,
@@ -105,7 +118,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               password: "discord-auth",
               imgUrl: profile?.image_url as string,
               name: profile?.global_name as string,
-              userName: profile?.username + (totalUsers + 1).toString(),
+              userName:
+                profile?.username +
+                specialCharacters[
+                  Math.floor(Math.random() * specialCharacters.length)
+                ] 
+                + (totalUsers + 1).toString(),
             });
           } else {
             // await db
@@ -130,22 +148,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
       if (account?.provider === "google" || account?.provider === "discord") {
         if (User.length > 0) {
-          console.log("User found from jwt: ", User);
           token.id = User[0].id?.toString();
           user.id = User[0].id?.toString();
-          console.log("token from jwt: ", token);
         }
       }
 
       if (user) {
         token.id = User[0]?.id?.toString();
         token.email = user.email?.toString();
+        token.picture = User[0]?.imgUrl?.toString();
       }
 
       return token;
     },
     async session({ session, token, user }) {
-      console.log("token sub: ", token.sub);
       if (token) {
         session.user.id = token.id?.toString()!;
         session.user.email = token.email?.toString()!;

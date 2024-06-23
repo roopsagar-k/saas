@@ -37,7 +37,7 @@ const Dashboard = () => {
         takenTests?.map((test) => (
           <Card
             key={test?.tests?.id!}
-            className="md:w-[35rem] lg:w-[55rem] mt-6 cursor-pointer hover:bg-accent dark:hover:bg-slate-900 shadow-sm shadow-gray-400 dark:shadow-none"
+            className="md:w-[35rem] lg:w-[55rem] mt-6 cursor-pointer dark:hover:bg-slate-900 shadow-sm shadow-gray-400 dark:shadow-none"
           >
             <CardHeader>
               <CardTitle className="sm:text-md md:text-lg lg:text-xl">

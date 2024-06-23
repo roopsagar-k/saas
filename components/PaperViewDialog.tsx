@@ -12,7 +12,7 @@ const PaperViewDialog: React.FC<DialogPorps> = ({ questions }) => {
     <div>
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant="secondary" className="w-full mt-4">
+          <Button variant="secondary" className="w-full mt-4 shadow-sm">
             View paper
           </Button>
         </DialogTrigger>

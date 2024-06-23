@@ -7,24 +7,27 @@ import { UserTable } from "@/lib/drizzle/schema";
 export async function GET(req: NextRequest) {
   try {
     const searchQuery = req.nextUrl.searchParams.get("q");
-    console.log("SEARCH query: ", searchQuery);
-  const queryResults = await db
-    .select()
-    .from(TestTable)
-    .innerJoin(UserTable, eq(TestTable.userId, UserTable.id))
-    .where(
-      and(
-        or(
-          ilike(TestTable.title, `%${searchQuery}%`),
-          ilike(TestTable.tags, `%${searchQuery}%`)
-        ),
-        eq(TestTable.privatePost, false)
-      )
+
+    const queryResults = await db
+      .select()
+      .from(TestTable)
+      .innerJoin(UserTable, eq(TestTable.userId, UserTable.id))
+      .where(
+        and(
+          or(
+            ilike(TestTable.title, `%${searchQuery}%`),
+            ilike(TestTable.tags, `%${searchQuery}%`)
+          ),
+          eq(TestTable.privatePost, false)
+        )
+      );
+
+    return new Response(
+      JSON.stringify({ message: "search successfull", queryResults }),
+      {
+        status: 200,
+      }
     );
-  console.log(queryResults);
-    return new Response(JSON.stringify({ message: "search successfull", queryResults }), {
-      status: 200,
-    });
   } catch (error) {
     console.error("Error fetching search data:", error);
     return new Response(JSON.stringify({ message: "search failed" }), {

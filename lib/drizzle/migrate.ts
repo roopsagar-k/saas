@@ -4,7 +4,6 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import pg from "pg";
 
 if (!process.env.DB_URL) {
-  console.log(process.env.DB_URL);
   throw new Error("DB_URL environment variable is required.");
 }
 
@@ -17,11 +16,11 @@ const db = drizzle(client);
 async function runMigration() {
   try {
     await client.connect();
-    console.log("Migration started...");
+
     await migrate(db, {
       migrationsFolder: "./lib/drizzle/migrations",
     });
-    console.log("Migration ended...");
+
     process.exit(0);
   } catch (err) {
     console.error("Error during migration", err);

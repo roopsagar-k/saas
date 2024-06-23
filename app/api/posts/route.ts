@@ -8,6 +8,6 @@ export async function GET() {
     .from(TestTable)
     .innerJoin(UserTable, eq(TestTable.userId, UserTable.id))
     .where(eq(TestTable.privatePost, false));
-  console.log("TEST DATA : ", tests);
+
   return Response.json({ message: "GET request", tests }, { status: 200 });
 }

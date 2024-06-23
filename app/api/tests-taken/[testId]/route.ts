@@ -7,7 +7,6 @@ export const GET = auth(async function GET(
   req,
   { params }: { params: { testId: string } }
 ) {
-console.log(params.testId, "testId")
   const result = await db
     .select()
     .from(TestsTakenTable)
@@ -19,15 +18,19 @@ console.log(params.testId, "testId")
     );
 
   const response = await db
-    .select({ totalDuration: TestTable.duration, questions: TestTable.questions })
+    .select({
+      totalDuration: TestTable.duration,
+      questions: TestTable.questions,
+    })
     .from(TestTable)
-    .where(
-        eq(TestTable.id, result[0].testId),
-    );
+    .where(eq(TestTable.id, result[0].testId));
 
-    console.log(response, 'for dur')
   return Response.json(
-    { testDetails: result[0], totalDuration: response[0].totalDuration , questions: response[0].questions},
+    {
+      testDetails: result[0],
+      totalDuration: response[0].totalDuration,
+      questions: response[0].questions,
+    },
     { status: 200 }
   );
 });

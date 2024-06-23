@@ -6,6 +6,7 @@ import { TestTable } from "./drizzle/schema";
 import { QuestionType } from "@/app/types/types";
 import { Test, TestInfo } from "@/app/types/types";
 import { UserTable } from "./drizzle/schema";
+import nodemailer from "nodemailer";
 
 export async function addToBookMark(postId: string, userId: string) {
   const response = await db
@@ -45,13 +46,12 @@ export async function insertTestTakenInfo(testInfo: TestInfo, userId: string) {
   let currentScore = 0;
   testInfo.answers?.forEach((answer) => {
     const questionIndex = answer.questionIndex;
-    console.log(questionIndex);
+
     if (questions[questionIndex].answer === answer.answer.toString()) {
       currentScore += 1;
     }
   });
 
-  
   if (response.length > 0) {
     let highestScore = response[0].highestScore;
     await db
@@ -84,4 +84,33 @@ export async function insertTestTakenInfo(testInfo: TestInfo, userId: string) {
       totalScore: questions.length,
     });
   }
+}
+
+export async function sendOtp(email: string, genratedOtp: string) {
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_APP_PASSWORD,
+      },
+    });
+
+      try {
+        const info = await transporter.sendMail({
+          from: `"QuestionPaper Hub" <${process.env.EMAIL}>`,
+          to: email,
+          subject: "Hello from QuestionPaper Hub!",
+          text: `Your OTP code is: ${genratedOtp}`,
+          html: `<p>Your OTP code is: <b>${genratedOtp}</b></p>`,
+        });
+
+        console.log("Message sent: %s", info.messageId);
+        return { success: true, messageId: info.messageId };
+      } catch (error) {
+        console.error("Error sending OTP: ", error);
+        return { success: false, error: error instanceof Error ? error.message : error };
+      }
 }

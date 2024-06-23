@@ -36,22 +36,22 @@ const Question: React.FC<QuestionProps> = ({
   const router = useRouter();
   const { user, setUser } = useUserContext();
 
-    useEffect(() => {
-      async function checkAuthenticated() {
-        if (!user) {
-          try {
-            const response = await axios.get("/api/admin");
-            if (response.status === 200) {
-              console.log("User data fetched:", response.data);
-              setUser(response.data);
-            }
-          } catch (error) {
-            console.error("Error fetching user data:", error);
+
+  useEffect(() => {
+    async function checkAuthenticated() {
+      if (!user) {
+        try {
+          const response = await axios.get("/api/admin");
+          if (response.status === 200) {
+            setUser(response.data);
           }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
         }
       }
-      checkAuthenticated();
-    }, [user]);
+    }
+    checkAuthenticated();
+  }, [user]);
 
   useEffect(() => {
     const answerObj = testInfo?.answers?.find(
@@ -101,7 +101,7 @@ const Question: React.FC<QuestionProps> = ({
           />
         </div>
       </div>
-      <Card className="my-4 mb-12 w-full flex-grow overflow-auto px-6 border border-2">
+      <Card className="my-4 mb-12 w-full flex-grow overflow-auto px-6 shadow-md">
         <CardHeader>
           <CardTitle className="whitespace-pre-wrap break-words font-medium">
             {index + 1 + ".  "} {test?.questions![index].question}
@@ -127,10 +127,10 @@ const Question: React.FC<QuestionProps> = ({
                   className={classNames(
                     `p-4 border-2 w-full h-full border-l-4 border-l-primary dark:bg-black backdrop-blur-xl ${
                       selectedOption !== OptionIndex + 1 &&
-                      "hover:bg-accent dark:hover:bg-slate-900 dark:hover:bg-opacity-50"
+                      "hover:bg-blue-100 dark:hover:bg-slate-900 dark:hover:bg-opacity-50"
                     } cursor-pointer rounded-sm`,
                     selectedOption === OptionIndex + 1 &&
-                      "bg-blue-100 dark:bg-blue-950"
+                      "bg-blue-200 dark:bg-blue-950"
                   )}
                   htmlFor={`r${OptionIndex}`}
                 >

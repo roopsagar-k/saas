@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -17,22 +17,26 @@ import { SignIn } from "@/lib/signin";
 import { AuthError } from "next-auth";
 import { signIn } from "next-auth/react";
 
-const Login = ({
-  setLogin,
-  isLogin,
-}: {
-  setLogin: (newValue: boolean) => void;
-  isLogin: boolean;
-}) => {
+interface LoginProps {
+  setIsLogin?: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+
+const Login: React.FC<LoginProps> = ({ setIsLogin }) => {
   const router = useRouter();
   const { theme } = useTheme();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | undefined>("");
+  const pathname = usePathname();
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await SignIn(email, password);
+      await SignIn(
+        email,
+        password,
+        `${setIsLogin === undefined ? "/home" : pathname}`
+      );
       setEmail("");
       setPassword("");
       setError("");
@@ -55,8 +59,12 @@ const Login = ({
           <Button
             variant={"outline"}
             name="google"
-            onClick={() => signIn("discord", { callbackUrl: "/home" })}
-            className="w-full sm:w-1/2 flex items-center justify-center shadow-sm"
+            onClick={() =>
+              signIn("discord", {
+                callbackUrl: `${setIsLogin === undefined ? "/home" : pathname}`,
+              })
+            }
+            className="w-full sm:w-1/2 flex items-center justify-center shadow-sm text-black hover:text-primary dark:text-white dark:hover:text-primary"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -68,7 +76,7 @@ const Login = ({
               className="mx-2"
             >
               <g
-                fill={`${theme === "light" ? "#000000" : "#ffffff"}`}
+                fill="currentColor"
                 fill-rule="nonzero"
                 stroke="none"
                 stroke-width="1"
@@ -92,8 +100,12 @@ const Login = ({
           <Button
             variant={"outline"}
             name="google"
-            onClick={() => signIn("google", { callbackUrl: "/home" })}
-            className="w-full sm:w-1/2 flex items-center justify-center shadow-sm"
+            onClick={() =>
+              signIn("google", {
+                callbackUrl: `${setIsLogin === undefined ? "/home" : pathname}`,
+              })
+            }
+            className="w-full sm:w-1/2 flex items-center justify-center shadow-sm text-black hover:text-primary dark:text-white dark:hover:text-primary"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -104,7 +116,7 @@ const Login = ({
               viewBox="0,0,256,256"
             >
               <g
-                fill={`${theme === "light" ? "#000000" : "#ffffff"}`}
+                fill="currentColor"
                 fill-rule="nonzero"
                 stroke="none"
                 stroke-width="1"
@@ -128,7 +140,9 @@ const Login = ({
         </div>
         <div className="flex items-center gap-2 justify-center my-4">
           <div className="h-[0.5px] w-32 bg-slate-400"></div>
-          <div className="text-slate-400 text-sm">OR CONTINUE WITH</div>
+          <div className="text-foreground dark:text-slate-400 text-sm">
+            OR CONTINUE WITH
+          </div>
           <div className="h-[0.5px] w-32 bg-slate-400"></div>
         </div>
       </CardContent>
@@ -161,10 +175,12 @@ const Login = ({
             />
           </Label>
           <p className="w-full text-center">
-            Don't have an account?
+            Don&apos;t have an account?
             <span
               className="text-blue-500 mx-3 hover:underline hover:cursor-pointer"
-              onClick={() => router.replace("/register")}
+              onClick={() =>
+                setIsLogin ? setIsLogin(false) : router.replace("/register")
+              }
             >
               Register
             </span>

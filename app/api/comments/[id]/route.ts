@@ -9,7 +9,6 @@ export const PUT = auth(async function PUT(
   req,
   { params }: { params: { id: string } }
 ) {
-  console.log("reached yo")
   const { commentMessage, commentId, recipientId } = await req.json();
   const comment = await db
     .select()

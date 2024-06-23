@@ -53,7 +53,7 @@ const EditPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-3 sm:px-6 md:px-[10%] lg:px-[20%] xl:px-12 py-8">
+    <div className="sm:px-6 md:px-[10%] lg:px-[20%] py-8">
       <div className="max-w-screen-lg mx-auto">
         <div className="my-4">
           <Label className="font-semibold text-lg" htmlFor="title">
@@ -102,7 +102,7 @@ const EditPage = () => {
               placeholder="Add relevant tags (comma-separated)"
             />
           </div>
-          <div className="flex items-center gap-4 mt-6 sm:mt-0">
+          <div className="flex items-center justify-center gap-4 mt-6">
             <Label className="font-semibold text-lg" htmlFor="private-post">
               Private Post:
             </Label>

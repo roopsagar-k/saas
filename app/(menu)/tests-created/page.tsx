@@ -32,26 +32,27 @@ import { useMediaQuery } from "react-responsive";
 
 const TestsCreated = () => {
   const [tests, setTests] = useState<Test[]>([]);
-  const isTabView = useMediaQuery({ query: "(min-width: 768px) && (max-width: 1024px)" });
+  const isTabView = useMediaQuery({
+    query: "(min-width: 768px) && (max-width: 1024px)",
+  });
   const router = useRouter();
   useEffect(() => {
     async function fetchData() {
       const response = await axios.get("/api/tests");
       setTests(response?.data);
-      console.log("tests: ", tests);
     }
     fetchData();
   }, []);
 
   const handleSwitchChange = async (testId: string | undefined) => {
     const test = tests.find((test) => test.id === testId);
-    console.log(test);
+
     if (test) {
       const response = await axios.put("/api/tests", {
         ...test,
         privatePost: !test.privatePost,
       });
-      console.log("response: ", response.data);
+
       if (response.status === 200) {
         setTests((prev) =>
           prev.map((test) =>
@@ -66,7 +67,7 @@ const TestsCreated = () => {
 
   const handleDelete = async (testId: string | undefined) => {
     const response = await axios.delete(`/api/tests/${testId}`);
-    console.log("response: ", response.data);
+
     if (response.status === 200) {
       setTests((prev) => prev.filter((test) => test.id !== testId));
     }

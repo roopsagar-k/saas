@@ -1,1 +1,0 @@
-ALTER TABLE "tests" ADD COLUMN "questions" jsonb[];

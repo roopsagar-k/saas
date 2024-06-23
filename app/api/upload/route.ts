@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   const uploadedFiles: string[] = [];
   const formData = await request.formData();
   const files = formData.getAll("file") as Array<File>;
-  console.log("files: ", files);
+
   const uploadsDir = path.join(process.cwd(), "public/images");
   await fs.ensureDir(uploadsDir);
   for (let i = 0; i < files.length; i++) {
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     uploadedFiles.push(fileName);
     await pipelineAsync(file.stream(), fs.createWriteStream(filePath));
   }
-  console.log(uploadedFiles, "file uploaded");
+
   return new Response(
     JSON.stringify({ message: "file uploaded", uploadedFiles }),
     {

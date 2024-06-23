@@ -35,7 +35,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     recipientId: string
   ) => {
-    console.log("clicked");
     await axios.put(`/api/comments/${postId}`, {
       commentMessage,
       commentId,
@@ -86,7 +85,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({
               </Avatar>
               <div className="flex flex-col justify-center text-sm">
                 <p className="font-semibold">{comment?.users.name}</p>
-                <p className="text-gray-300">{"@" + comment?.users.userName}</p>
+                <p className="text-gray-500 dark:text-gray-300 hover:underline hover:text-primary dark:hover:text-primary cursor-pointer">
+                  {"@" + comment?.users.userName}
+                </p>
               </div>
             </div>
             <div className="message mt-4 whitespace-pre-wrap">
@@ -137,7 +138,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
                       <p className="font-semibold">
                         {nestedComment?.user?.name}
                       </p>
-                      <p className="text-gray-300">
+                      <p className="text-gray-500 dark:text-gray-300 cursor-pointer hover:text-primary dark:hover:text-primary hover:underline">
                         {"@" + nestedComment?.user?.userName}
                       </p>
                     </div>

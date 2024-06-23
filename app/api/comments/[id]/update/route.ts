@@ -9,7 +9,7 @@ export const PUT = auth(async function PUT(
   { params }: { params: { id: string } }
 ) {
   const { updatedMessage, nested, nestedCommentId } = await req.json();
-    console.log("reached to update yo");
+
   if (!nested) {
     // Update the main comment if it's not a nested comment
     await db
@@ -31,12 +31,13 @@ export const PUT = auth(async function PUT(
       .from(CommentsTable)
       .where(eq(CommentsTable.id, params.id));
 
-    let nestedComments: NestedComment[] = comment[0].nestedComments as NestedComment[];
+    let nestedComments: NestedComment[] = comment[0]
+      .nestedComments as NestedComment[];
 
     const commentIndex = nestedComments?.findIndex(
       (comment: NestedComment) => comment.id === nestedCommentId
     );
-    console.log(nestedComments, "nestedComments");
+
     if (commentIndex !== -1) {
       nestedComments[commentIndex].message = updatedMessage;
 

@@ -34,7 +34,9 @@ export const PUT = auth(async function PUT(
           upVote: val,
           downVote: val ? false : currentVote.downVote,
         })
-        .where(and(eq(VotesTable.postId, postId), eq(VotesTable.userId, userId)));
+        .where(
+          and(eq(VotesTable.postId, postId), eq(VotesTable.userId, userId))
+        );
     }
   } else if (operation === "downVote") {
     if (result.length === 0) {
@@ -52,7 +54,9 @@ export const PUT = auth(async function PUT(
           downVote: val,
           upVote: val ? false : currentVote.upVote,
         })
-        .where( and(eq(VotesTable.postId, postId), eq(VotesTable.userId, userId)));
+        .where(
+          and(eq(VotesTable.postId, postId), eq(VotesTable.userId, userId))
+        );
     }
   }
 
@@ -70,12 +74,11 @@ export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  console.log("params id", params.id);
   const tests = await db
     .select()
     .from(TestTable)
     .innerJoin(UserTable, eq(TestTable.userId, UserTable.id))
     .where(eq(TestTable.privatePost, false) && eq(TestTable.id, params.id));
-  console.log("TEST DATA : ", tests);
+
   return Response.json({ message: "GET request", tests }, { status: 200 });
 }

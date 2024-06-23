@@ -28,7 +28,7 @@ const LandingNav = ({ children }: { children?: React.ReactNode }) => {
 
   return (
     <main>
-      <div className="fixed top-0 left-0 right-0 w-full grid grid-cols-3 px-2 py-4 bg-transparent dark:backdrop-blur-sm">
+      <div className="fixed top-0 left-0 right-0 w-full grid grid-cols-3 px-2 py-4 bg-transparent backdrop-blur-sm">
           <div className="logo flex gap-2 items-center text-primary text-xl">
             <Origami className="w-8 h-8" />
             <p className="font-semibold">Question Paper Hub</p>

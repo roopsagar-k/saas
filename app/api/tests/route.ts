@@ -10,7 +10,7 @@ export const GET = auth(async function GET(req) {
       .select()
       .from(TestTable)
       .where(eq(TestTable.userId, req.auth?.user?.id!));
-    console.log("tests: ", tests);
+
     return new Response(JSON.stringify(tests), { status: 200 });
   }
 });
@@ -21,7 +21,7 @@ export const POST = auth(async function POST(req) {
     id = req.auth?.user?.id!;
   }
   const data: Test = await req.json();
-  console.log("data: ", data);
+
   const response = await db
     .insert(TestTable)
     .values({
@@ -35,9 +35,7 @@ export const POST = auth(async function POST(req) {
       createdAt: Date.now().toString(),
     })
     .returning({ testId: TestTable.id });
-    console.log("response: testid ", response);
-    
- 
+
   return new Response(
     JSON.stringify({
       message: "test created successfully",
@@ -51,7 +49,7 @@ export const POST = auth(async function POST(req) {
 
 export async function PUT(request: Request) {
   const data = await request.json();
-  console.log("PUT data: ", data);
+
   await db
     .update(TestTable)
     .set({ privatePost: data.privatePost })
@@ -81,7 +79,7 @@ export async function PUT(request: Request) {
 
 //     const fileName = `${Date.now()}-${file?.name}`;
 //     filePath = path.join(uploadsDir, fileName);
-//     console.log("filePath: ", filePath);
+//
 
 //     // Create a writable stream and pipe the file stream into it
 //     await pipelineAsync(file.stream(), fs.createWriteStream(filePath));
@@ -89,7 +87,7 @@ export async function PUT(request: Request) {
 //     const response = await ocrSpace(filePath, {
 //       apiKey: process.env.OCR_SPACE_API_KEY,
 //     });
-//     console.log("response:", response);
+//
 //   } catch (error) {
 //     console.error("Error processing file: ", error);
 //   }

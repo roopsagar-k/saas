@@ -10,7 +10,7 @@ const Home = () => {
   useEffect(() => {
     async function fetchData() {
       const response = await axios.get("/api/posts");
-      console.log(response.data.tests);
+
       setPosts(response.data.tests);
     }
     fetchData();

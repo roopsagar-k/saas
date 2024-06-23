@@ -4,13 +4,20 @@ import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import classNames from "classnames";
-import { PanelRightOpen } from "lucide-react";
+import {
+  ArrowLeftFromLine,
+  ArrowRightFromLine,
+  LogOut,
+  PanelRightOpen,
+} from "lucide-react";
 import { PanelRightClose } from "lucide-react";
 import { User } from "lucide-react";
 import ToolTip from "./ToolTip";
 import axios from "axios";
 import { useUserContext } from "@/context/UserContext";
 import { Origami } from "lucide-react";
+import { signOut } from "next-auth/react";
+import Link from "next/link";
 
 const SideBar = () => {
   const [view, setView] = useState("desktop");
@@ -33,7 +40,7 @@ const SideBar = () => {
   const { user, setUser } = useUserContext();
   const router = useRouter();
   const pathName: string = usePathname();
-  const btnClass: string = `font-medium text-[#A8B3CF] text-lg flex items-center mx-2 mt-1 rounded-lg gap-2 py-4 px-3 cursor-pointer hover:rounded-lg ${
+  const btnClass: string = `font-medium text-gray-700 dark:text-[#A8B3CF] text-lg flex items-center mx-2 mt-1 rounded-lg gap-2 py-4 px-3 cursor-pointer hover:rounded-lg ${
     !expanded && "flex items-center justify-center "
   }`;
 
@@ -47,7 +54,7 @@ const SideBar = () => {
         try {
           const response = await axios.get("/api/admin");
           if (response.status === 200) {
-            console.log("User data fetched:", response.data);
+            console.log("user dta: ", response.data);
             setUser(response.data);
           }
         } catch (error) {
@@ -56,17 +63,21 @@ const SideBar = () => {
       }
     }
     checkAuthenticated();
-    updateView(); 
+    updateView();
     window.addEventListener("resize", updateView);
-    return () => window.removeEventListener("resize", updateView); 
+    return () => window.removeEventListener("resize", updateView);
   }, [user]);
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/login" });
+  };
 
   const Home = () => {
     return (
-      <div
-        onClick={() => router.replace("/home")}
+      <Link
+        href="/home"
         className={classNames(btnClass, {
-          "bg-primary text-white": pathName === "/home",
+          "bg-primary text-white dark:text-white": pathName === "/home",
           "hover:bg-primary": pathName === "/home",
           "hover:bg-accent": pathName !== "/home",
         })}
@@ -81,16 +92,16 @@ const SideBar = () => {
           <path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
         </svg>
         {expanded && <span>Home</span>}
-      </div>
+      </Link>
     );
   };
 
   const BookMark = () => {
     return (
-      <div
-        onClick={() => router.replace("/bookmark")}
+      <Link
+        href="/bookmark"
         className={classNames(btnClass, {
-          "bg-primary text-white": pathName === "/bookmark",
+          "bg-primary text-white dark:text-white": pathName === "/bookmark",
           "hover:bg-primary": pathName === "/bookmark",
           "hover:bg-accent": pathName !== "/bookmark",
         })}
@@ -107,16 +118,17 @@ const SideBar = () => {
           ></path>
         </svg>
         {expanded && <span>Bookmarks</span>}
-      </div>
+      </Link>
     );
   };
 
   const TestsCreated = () => {
     return (
-      <div
-        onClick={() => router.replace("/tests-created")}
+      <Link
+        href="/tests-created"
         className={classNames(btnClass, {
-          "bg-primary text-white": pathName === "/tests-created",
+          "bg-primary text-white dark:text-white":
+            pathName === "/tests-created",
           "hover:bg-primary": pathName === "/tests-created",
           "hover:bg-accent": pathName !== "/tests-created",
         })}
@@ -131,16 +143,16 @@ const SideBar = () => {
           <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
         </svg>
         {expanded && <span>Tests created</span>}
-      </div>
+      </Link>
     );
   };
 
   const Dashboard = () => {
     return (
-      <div
-        onClick={() => router.replace("/dashboard")}
+      <Link
+        href="/dashboard"
         className={classNames(btnClass, {
-          "bg-primary text-white": pathName === "/dashboard",
+          "bg-primary text-white dark:text-white": pathName === "/dashboard",
           "hover:bg-primary": pathName === "/dashboard",
           "hover:bg-secondary": pathName !== "/dashboard",
         })}
@@ -158,12 +170,12 @@ const SideBar = () => {
           />
         </svg>
         {expanded && <span>Dashboard</span>}
-      </div>
+      </Link>
     );
   };
   return (
     <div
-      className={`border border-r-2 transition-all h-screen py-4 relative text-[#A8B3CF]   ${
+      className={`border border-r-2 transition-all max-h-screen py-4 relative text-gray-700 dark:text-[#A8B3CF]    ${
         !expanded ? "xl:min-w-[50px]" : "xl:min-w-[370px]"
       }`}
     >
@@ -177,7 +189,11 @@ const SideBar = () => {
             {expanded && (
               <div className="flex gap-2 items-center text-primary">
                 <Origami className="w-6 h-6" />
-                <p className="font-bold text-xl">Question Paper Hub</p>
+                <div className="bg-gradient-to-r from-primary to-secondary-foreground text-transparent bg-clip-text relative">
+                  <p className="font-bold text-xl animate-in animate-out">
+                    Question Paper Hub
+                  </p>
+                </div>
               </div>
             )}
           </span>
@@ -187,24 +203,36 @@ const SideBar = () => {
               onClick={() => setExpanded(!expanded)}
             >
               {expanded ? (
-                <PanelRightOpen color="currentColor" size={"28px"} />
+                <ArrowLeftFromLine color="currentColor" size={"28px"} />
               ) : (
-                <PanelRightClose color="currentColor" size={"28px"} />
+                <ArrowRightFromLine color="currentColor" size={"28px"} />
               )}
             </span>
           )}
           {view === "tablet" && <Origami className="w-6 h-6" />}
         </div>
-        <Separator />
-        <div className="absolute bottom-0 left-0 right-0 flex flex-col justify-center h-24 items-left">
+        <Separator color="white" />
+        <div className="absolute bottom-0 left-0 right-0 flex flex-col justify-center items-left">
           <Separator color="white" />
-          {expanded ? (   
+          <div
+            onClick={() => handleLogout()}
+            className={`font-medium text-foreground dark:text-[#A8B3CF] items-center text-lg flex gap-3 py-4 px-3 hover:cursor-pointer hover:bg-secondary ${
+              expanded ? "justify-start" : "justify-center"
+            }`}
+          >
+            <p className={"flex gap-3 items-center text-destructive"}>
+              <LogOut className={`w-6 h-6                     `} />
+              {expanded && <span>Log out</span>}
+            </p>
+          </div>
+          <Separator color="white" />
+          {expanded ? (
             <div className="py-4 px-3 ">
-              <p className="font-medium sm:text-md md:text-lg lg:text-xl truncate text-white">
-                {user?.name}
+              <p className="font-medium sm:text-md md:text-lg lg:text-xl truncate text-foreground dark:text-white">
+                {user?.name ?? "Questionpaper Hub"}
               </p>
-              <p className="py-2 text-gray-400 sm:text-sm md:text-base lg:text-lg truncate">
-                {user?.email}
+              <p className="py-2 text-gray-700 dark:text-gray-400 sm:text-sm md:text-base lg:text-lg truncate">
+                {user?.email ?? "questionpaperhub@gmail.com"}
               </p>
             </div>
           ) : (

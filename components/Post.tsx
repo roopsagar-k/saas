@@ -17,6 +17,10 @@ import { Tag } from "lucide-react";
 import type { UserVoteType } from "@/app/types/types";
 import { formatDistanceToNow } from "date-fns";
 import { useMediaQuery } from "react-responsive";
+import { useUserContext } from "@/context/UserContext";
+import AuthModal from "@/components/AuthModal";
+import Register from "./Register";
+import Login from "./Login";
 
 interface PostComponentProps {
   post: PostType;
@@ -42,7 +46,12 @@ const Post: React.FC<PostComponentProps> = ({
     useState<boolean>(false);
   const maxLengthOfDescription =
     descriptionLength === "half" ? 500 : post?.tests.description.length;
-  const isTabView = useMediaQuery({ query: "(min-width: 768px) && (max-width: 1024px)" })
+  const isTabView = useMediaQuery({
+    query: "(min-width: 768px) && (max-width: 1024px)",
+  });
+  const [openLoginDialog, setOpenLoginDialog] = useState(false);
+  const [isLogin, setIsLogin] = useState(false);
+  const { user } = useUserContext();
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -91,107 +100,125 @@ const Post: React.FC<PostComponentProps> = ({
   };
 
   const createdAt = post?.tests?.createdAt;
-  console.log(createdAt, "time date");
+
   const formattedDate = createdAt
     ? formatDistanceToNow(new Date(parseInt(createdAt)), { addSuffix: true })
     : "Unknown time";
 
   return (
-    <div>
-      <Card key={id} className="min-w-[35rem] lg:min-w-[55rem] py-6 px-8">
-        <div className="flex items-center gap-4">
-          <Avatar className="cursor-pointer text-center size-16 flex items-center">
-            <AvatarImage className="rounded-lg" src={post?.users?.imgUrl} />
-            <AvatarFallback>{post?.users?.name?.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <p className="font-semibold">{post?.users?.name}</p>
-            <p className="text-gray-300">
-              @{post?.users?.userName} | {formattedDate}
-            </p>
-          </div>
-        </div>
-        <h3 className="mt-8 text-2xl font-semibold tracking-tight">
-          {post?.tests?.title}
-        </h3>
-        <p className="mt-4 leading-7">
-          {post?.tests?.description.length > maxLengthOfDescription
-            ? `${
-                isTabView
-                  ? post?.tests?.description.slice(0, 250)
-                  : post?.tests?.description.slice(0, maxLengthOfDescription)
-              }...`
-            : `${
-                isTabView
-                  ? post?.tests?.description.slice(0, 250) + "..."
-                  : post?.tests?.description
-              }`}
-          {post?.tests?.description.length > maxLengthOfDescription && (
-            <Button onClick={handleReadMore} className="-ml-4" variant="link">
-              read more
-            </Button>
+    <>
+      {openLoginDialog && (
+        <AuthModal open={openLoginDialog} setOpen={setOpenLoginDialog}>
+          {!isLogin ? (
+            <Register setIsLogin={setIsLogin} />
+          ) : (
+            <Login setIsLogin={setIsLogin} />
           )}
-        </p>
-        <div className="mt-4 font-semibold">
-          <p className="items-center">
-            <div>
-              <div className="flex gap-2">
-                <Tag className="transform rotate-90" stroke="#A8B3CF" />
-                <p>Tags:</p>{" "}
-              </div>
-              <span className="text-primary font-medium mt-2">
-                {isTabView
-                  ? post?.tests?.tags.slice(0, 100) + "..."
-                  : post?.tests?.tags}
-              </span>
+        </AuthModal>
+      )}
+
+      <div>
+        <Card
+          key={id}
+          className="min-w-[35rem] text-card-foreground lg:min-w-[55rem] py-6 px-8 shadow-md"
+        >
+          <div className="flex items-center gap-4">
+            <Avatar className="cursor-pointer text-center size-16 flex items-center">
+              <AvatarImage className="rounded-lg" src={post?.users?.imgUrl} />
+              <AvatarFallback>{post?.users?.name?.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <p className="font-semibold">{post?.users?.name}</p>
+              <p className="text-gray-600 dark:text-gray-400">
+                <span className="hover:cursor-pointer hover:text-primary hover:underline">
+                  @{post?.users?.userName}
+                </span>{" "}
+                | {formattedDate}
+              </p>
             </div>
-          </p>
-          <div className="mt-4 flex gap-4 text-[#A8B3CF]">
-            <p>
-              {comments.length} Comments | {totalUpVotes} Upvotes
-            </p>
           </div>
-        </div>
-        <div>
-          <PaperViewDialog questions={post?.tests?.questions!} />
-          <Button onClick={handleTakeTest} className="w-full mt-2">
-            Take Test
-          </Button>
-        </div>
-        <div>
-          <InteractionPanel
-            setBookMarkUpdate={setBookMarkUpdate!}
-            post={post}
-            vote={vote!}
-            setVote={setVote}
-          />
-        </div>
-        {descriptionLength === "full" && (
-          <>
-            <div className="mt-8">
-              <Comment
-                showTextArea={showTextArea}
-                setShowTextArea={setShowTextArea}
-                post={post}
-                comment={comment}
-                setComment={setComment}
-              />
+          <h3 className="mt-8 text-2xl font-semibold tracking-tight">
+            {post?.tests?.title}
+          </h3>
+          <p className="mt-4 leading-7">
+            {post?.tests?.description.length > maxLengthOfDescription
+              ? `${
+                  isTabView
+                    ? post?.tests?.description.slice(0, 250)
+                    : post?.tests?.description.slice(0, maxLengthOfDescription)
+                }...`
+              : `${
+                  isTabView
+                    ? post?.tests?.description.slice(0, 250) + "..."
+                    : post?.tests?.description
+                }`}
+            {post?.tests?.description.length > maxLengthOfDescription && (
+              <Button onClick={handleReadMore} className="-ml-4" variant="link">
+                read more
+              </Button>
+            )}
+          </p>
+          <div className="mt-4 font-semibold">
+            <p className="items-center">
+              <div>
+                <div className="flex gap-2">
+                  <Tag className="transform rotate-90 text-gray-700 dark:text-[#A8B3CF]" />
+                  <p>Tags:</p>{" "}
+                </div>
+                <span className="text-primary font-medium mt-2">
+                  {isTabView
+                    ? post?.tests?.tags.slice(0, 100) + "..."
+                    : post?.tests?.tags}
+                </span>
+              </div>
+            </p>
+            <div className="mt-4 flex gap-4 text-gray-700 dark:text-[#A8B3CF]">
+              <p>
+                {comments.length} Comments | {totalUpVotes} Upvotes
+              </p>
             </div>
-            <div className="mt-8">
-              {comments.length > 0 && (
-                <CommentSection
-                  commentMessage={commentMessage}
-                  setCommentMessage={setCommentMessage}
-                  comments={comments}
-                  postId={id}
-                  setTriggerFetchComments={setTriggerFetchComments}
+          </div>
+          <div>
+            <PaperViewDialog questions={post?.tests?.questions!} />
+            <Button onClick={() => user ? handleTakeTest() : setOpenLoginDialog(true) } className="w-full mt-2">
+              Take Test
+            </Button>
+          </div>
+          <div>
+            <InteractionPanel
+              setBookMarkUpdate={setBookMarkUpdate!}
+              post={post}
+              vote={vote!}
+              setVote={setVote}
+            />
+          </div>
+          {descriptionLength === "full" && (
+            <>
+              <div className="mt-8">
+                <Comment
+                  showTextArea={showTextArea}
+                  setShowTextArea={setShowTextArea}
+                  post={post}
+                  comment={comment}
+                  setComment={setComment}
                 />
-              )}
-            </div>
-          </>
-        )}
-      </Card>
-    </div>
+              </div>
+              <div className="mt-8">
+                {comments.length > 0 && (
+                  <CommentSection
+                    commentMessage={commentMessage}
+                    setCommentMessage={setCommentMessage}
+                    comments={comments}
+                    postId={id}
+                    setTriggerFetchComments={setTriggerFetchComments}
+                  />
+                )}
+              </div>
+            </>
+          )}
+        </Card>
+      </div>
+    </>
   );
 };
 

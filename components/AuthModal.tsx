@@ -1,6 +1,7 @@
 "use client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 interface ModalProps {
   children: React.ReactNode;
   open: boolean;
@@ -9,12 +10,9 @@ interface ModalProps {
 
 const AuthModal: React.FC<ModalProps> = ({ children, open, setOpen }) => {
   const router = useRouter();
-  const handleClose = () => {
-    router.push("/");
-    return setOpen;
-  };
+  const pathname = usePathname(); 
   return (
-    <Dialog open={open} onOpenChange={() => handleClose()}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="bg-transparent p-0">{children}</DialogContent>
     </Dialog>
   );

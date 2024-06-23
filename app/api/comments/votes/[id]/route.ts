@@ -9,7 +9,6 @@ export const GET = auth(async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    console.log("catched");
     if (!req?.auth?.user?.id) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
@@ -44,8 +43,6 @@ export const GET = auth(async function GET(
 
     const count = allVotes.length;
 
-    console.log(response[0], "response for the comment votes");
-
     const commentVotes = {
       upVote: response.length > 0 ? response[0].upVote : false,
       downVote: response.length > 0 ? response[0].downVote : false,
@@ -68,7 +65,7 @@ export const PUT = auth(async function PUT(
 ) {
   const { nested, votes, nestedCommentId } = await req.json();
   let count = 0;
-  console.log("comment votes: ", votes, nested, nestedCommentId);
+
   if (!nested) {
     let response = await db
       .select()
@@ -79,7 +76,7 @@ export const PUT = auth(async function PUT(
           eq(CommentsVotesTable.userId, req?.auth?.user?.id!)
         )
       );
-    console.log("from comment code : ", response);
+
     if (response.length > 0) {
       await db
         .update(CommentsVotesTable)

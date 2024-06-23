@@ -5,7 +5,7 @@ import axios from "axios";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const layout = ({ children }: { children: React.ReactNode }) => {
+const Layout = ({ children }: { children: React.ReactNode }) => {
   const { id, pagination } = useParams();
   const [test, setTest] = useState<Test | null>(null);
   useEffect(() => {
@@ -20,4 +20,4 @@ const layout = ({ children }: { children: React.ReactNode }) => {
   return <TestInfoProvider>{children}</TestInfoProvider>;
 };
 
-export default layout;
+export default Layout;

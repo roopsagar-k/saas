@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { TriangleAlert } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
-const createPaper = () => {
+const CreatePaper = () => {
   const { id: testId } = useParams();
   const { toast } = useToast();
   const router = useRouter();
@@ -42,13 +42,13 @@ const createPaper = () => {
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
-    console.log("Submit");
+
     await axios.put("/api/upload", { deletedImages });
     const response = await axios.put("/api/tests/add-questions", {
       questions,
       testId,
     });
-    console.log("Response: ", response.data);
+
     if (response.status === 200) {
       toast({ description: "Questions updated successfully! :)" });
       router.replace("/tests-created");
@@ -57,9 +57,11 @@ const createPaper = () => {
 
   return (
     <div className="md:px-[10%] lg:px-[20%] py-8">
-      <h1 className="scroll-m-20 text-blue-400 text-4xl font-extrabold tracking-tight lg:text-5xl">
-        Create Your Ultimate Question Paper
-      </h1>
+      <div className="bg-gradient-to-r from-primary to-secondary-foreground text-transparent bg-clip-text relative">
+        <h1 className="text-xl font-bold text-center md:text-3xl lg:text-5xl">
+          Create and Share Your Ultimate Online Question Paper.
+        </h1>
+      </div>
       <div className="leading-7 [&:not(:first-child)]:mt-6 text-yellow-600">
         {warningText ? (
           <div className="flex gap-2">
@@ -89,4 +91,4 @@ const createPaper = () => {
   );
 };
 
-export default createPaper;
+export default CreatePaper;

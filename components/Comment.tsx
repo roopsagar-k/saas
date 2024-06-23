@@ -38,13 +38,13 @@ const Comment: React.FC<CommentProps> = ({
   return (
     <>
       <Card
-        onClick={() => setShowTextArea(true)}
+        onClick={() =>  setShowTextArea(true)}
         className={classNames(
           "bg-secondary md:min-w-[30rem] lg:min-w-[40rem] xl:min-w-[55rem] hover:border hover:border-gray-200 cursor-pointer p-2 flex justify-between items-center",
           showTextArea && "hidden"
         )}
       >
-        <div className="flex gap-4 text-gray-300 mx-1">
+        <div className="flex gap-4 text-foreground dark:text-gray-300 mx-1">
           <Avatar className="cursor-pointer size-16 flex items-center">
             <AvatarImage className="rounded-lg" src={user?.image} />
             <AvatarFallback>{post?.users?.name?.charAt(0)}</AvatarFallback>
@@ -55,7 +55,7 @@ const Comment: React.FC<CommentProps> = ({
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="w-8 h-8 pointer-events-none !h-6 !w-6 text-base -ml-2 mr-1"
+              className="w-8 h-8 pointer-events-none !h-6 !w-6 text-base -ml-2 mr-1 text-gray-700 dark:text-[#A8B3CF]"
             >
               <g fill-rule="evenodd" clip-rule="evenodd" fill="#A8B3CF">
                 <path

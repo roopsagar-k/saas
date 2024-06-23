@@ -95,7 +95,7 @@ const Questions = ({
       try {
         const response = await axios.post("/api/upload", formData);
         const { uploadedFiles } = response.data;
-        console.log(uploadedFiles, "uploaded files");
+
         setQuestions!((prev) => {
           const newArray = [...prev];
           uploadedFiles.forEach((fileName: string) => {
@@ -114,11 +114,13 @@ const Questions = ({
   return (
     <div>
       {questions?.map((question, index) => (
-        <Card key={index} className="py-4 mt-4">
+        <Card key={index} className="py-4 mt-4 shadow-md">
           <CardHeader>
             <CardTitle>
               Question {index + 1}.{" "}
-                {!answers?.find((ans) => ans.questionIndex === index) && showAnswers && "(NA)"}
+              {!answers?.find((ans) => ans.questionIndex === index) &&
+                showAnswers &&
+                "(NA)"}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -159,7 +161,7 @@ const Questions = ({
                           stroke-linejoin="round"
                           onClick={() => deleteImage(index, imageIndex)}
                           className={classNames(
-                            "lucide lucide-trash-2 absolute bottom-0 right-0 w-8 h-8 cursor-pointer rounded-full p-1 abs backdrop-blur-lg bg-transparent text-[#A8B3CF]"
+                            "lucide lucide-trash-2 absolute bottom-0 right-0 w-8 h-8 cursor-pointer rounded-full p-1 abs backdrop-blur-lg bg-transparent text-gray-700 dark:text-[#A8B3CF]"
                           )}
                         >
                           <path d="M3 6h18" />
