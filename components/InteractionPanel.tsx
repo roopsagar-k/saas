@@ -12,6 +12,7 @@ import Login from "./Login";
 import { Dialog } from "@/components/ui/dialog";
 import AuthModal from "./AuthModal";
 import Register from "./Register";
+import { useMediaQuery } from "react-responsive";
 
 interface InteractionPanelProps {
   setShowTextArea?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -36,6 +37,7 @@ const InteractionPanel: React.FC<InteractionPanelProps> = ({
   link += "/home/post/" + post?.tests.id;
   const [openLoginDialog, setOpenLoginDialog] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
+  const isPhoneView = useMediaQuery({ query: "(max-width: 767px)" });
 
   useEffect(() => {
     async function fetchBookMarks() {
@@ -147,7 +149,10 @@ const InteractionPanel: React.FC<InteractionPanelProps> = ({
               </svg>
             )}
           </div>
-          <div onClick={() => user ? updateDownVote() : setOpenLoginDialog(true)} className="rounded-md p-1">
+          <div
+            onClick={() => (user ? updateDownVote() : setOpenLoginDialog(true))}
+            className="rounded-md p-1"
+          >
             {!vote?.downVote ? (
               <svg
                 name="downVote"
@@ -182,7 +187,7 @@ const InteractionPanel: React.FC<InteractionPanelProps> = ({
         </div>
         <div className="flex justify-around w-full">
           <div
-            onClick={() => user ? handleClick() : setOpenLoginDialog(true)}
+            onClick={() => (user ? handleClick() : setOpenLoginDialog(true))}
             className="peer flex gap-2 items-center cursor-pointer hover:text-primary"
           >
             <svg
@@ -197,10 +202,12 @@ const InteractionPanel: React.FC<InteractionPanelProps> = ({
                 fill-rule="evenodd"
               ></path>
             </svg>
-            <p className="font-semibold peer-hover:text-primary">Comment</p>
+            {!isPhoneView && (
+              <p className="font-semibold peer-hover:text-primary">Comment</p>
+            )}
           </div>
           <div
-            onClick={() => user ? updateBookMark() : setOpenLoginDialog(true)}
+            onClick={() => (user ? updateBookMark() : setOpenLoginDialog(true))}
             className="peer flex gap-2 items-center cursor-pointer hover:text-primary"
           >
             {!isBookMark ? (
@@ -229,7 +236,9 @@ const InteractionPanel: React.FC<InteractionPanelProps> = ({
                 ></path>
               </svg>
             )}
-            <p className="font-semibold peer-hover:text-primary">Bookmark</p>
+            {!isPhoneView && (
+              <p className="font-semibold peer-hover:text-primary">Bookmark</p>
+            )}
           </div>
           <CopyLinkComponent link={link}>
             <div className="peer flex gap-2 items-center cursor-pointer hover:text-primary">
@@ -244,7 +253,9 @@ const InteractionPanel: React.FC<InteractionPanelProps> = ({
                   fill-rule="evenodd"
                 ></path>
               </svg>
-              <p className="font-semibold peer-hover:text-primary">Copy</p>
+              {!isPhoneView && (
+                <p className="font-semibold peer-hover:text-primary">Copy</p>
+              )}
             </div>
           </CopyLinkComponent>
         </div>

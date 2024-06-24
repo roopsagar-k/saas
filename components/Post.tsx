@@ -120,7 +120,7 @@ const Post: React.FC<PostComponentProps> = ({
       <div>
         <Card
           key={id}
-          className="min-w-[35rem] text-card-foreground lg:min-w-[55rem] py-6 px-8 shadow-md"
+          className="min-w-[10rem] md:min-w-[38rem] text-card-foreground lg:min-w-[55rem] py-3 px-4 md:py-6 md:px-8 shadow-md"
         >
           <div className="flex items-center gap-4">
             <Avatar className="cursor-pointer text-center size-16 flex items-center">

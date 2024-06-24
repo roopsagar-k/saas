@@ -18,16 +18,22 @@ const BookMark = () => {
   }, [bookMarkUpdate]);
   return (
     <div className="container whitespace-pre-wrap mx-auto max-w-md p-3 sm:p-6 md:p-8 lg:p-10 xl:p-12 flex flex-col items-center gap-8">
-      {bookMarks?.length! > 0 &&
-        bookMarks?.map((post) => (
-          <Post
-            key={post?.tests?.id}
-            id={post?.tests?.id!}
-            post={post as PostType}
-            descriptionLength={"half"}
-            setBookMarkUpdate={setBookMarkUpdate}
-          />
-        ))}
+      {bookMarks?.length! > 0 ? (
+        <>
+          {bookMarks?.map((post) => (
+            <Post
+              key={post?.tests?.id}
+              id={post?.tests?.id!}
+              post={post as PostType}
+              descriptionLength={"half"}
+              setBookMarkUpdate={setBookMarkUpdate}
+            />
+          ))}
+          <div className="h-16"></div>
+        </>
+      ) : (
+        <div className="w-full text-center text-gray-500">No Bookmarks</div>
+      )}
     </div>
   );
 };

@@ -209,7 +209,7 @@ const SideBar = () => {
               )}
             </span>
           )}
-          {view === "tablet" && <Origami className="w-6 h-6" />}
+          {view === "tablet" && <Origami className="w-6 h-6 text-primary" />}
         </div>
         <Separator color="white" />
         <div className="absolute bottom-0 left-0 right-0 flex flex-col justify-center items-left">

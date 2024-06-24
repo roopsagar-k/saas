@@ -31,7 +31,7 @@ import Register from "./Register";
 import Login from "./Login";
 import { useUserContext } from "@/context/UserContext";
 
-const DrawerTest = () => {
+const DrawerTest = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const [ownTest, setOwnTest] = useState(false);
   const [privatePost, setPrivatePost] = useState(false);
@@ -41,7 +41,7 @@ const DrawerTest = () => {
   const [openLoginDialog, setOpenLoginDialog] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const [openDrawer, setOpenDrawer] = useState(false);
-  const {user} = useUserContext();
+  const { user } = useUserContext();
 
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -113,14 +113,14 @@ const DrawerTest = () => {
         </AuthModal>
       )}
       <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
-          <div
-            onClick={() =>
-              user ? setOpenDrawer(true) : setOpenLoginDialog(true)
-            }
-            className="bg-primary p-4 text-white rounded-full"
-          >
-            <Plus className="h-8 w-8" />
-          </div>
+        <div
+          onClick={() =>
+            user ? setOpenDrawer(true) : setOpenLoginDialog(true)
+          }
+        >
+          {children}
+        </div>
+       
         <DrawerContent className="sm:px-[10%] md:[15%] lg:px-[20%]">
           <form onSubmit={(e) => handleSubmit(e)}>
             <DrawerHeader>
